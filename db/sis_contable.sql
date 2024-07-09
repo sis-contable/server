@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-07-2024 a las 20:17:15
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 09-07-2024 a las 20:57:24
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,15 +18,15 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `sis_contable2`
+-- Base de datos: `sis_contable`
 --
 
 DELIMITER $$
 --
 -- Procedimientos
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getAllUser` ()   begin
-	select * from usuarios; 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
+	select usuarios.id_usuario, tipos_usuario.tipo_usuario, usuarios.nombre from usuarios, tipos_usuario WHERE usuarios.id_tipo_usuario = tipos_usuario.id_tipo_usuario; 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `json_text` TEXT)   begin
