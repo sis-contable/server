@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ListUsers from '../Users/ListUsers';
 // Importamos la función de login desde el archivo loginService.js
 import loginService from '../../services/loginService';
+import App from '../../App.jsx';
 
 // Definimos un componente funcional llamado Login utilizando una arrow function
 const Login = () => {
@@ -44,8 +45,8 @@ const Login = () => {
   return (
     <>
       {loginSuccessful ? (
-        // Si el login es exitoso, mostramos el componente Home o ListUsers
-        <ListUsers/>
+        // Si el login es exitoso, mostramos el componente APP
+        <App/>
       ) : (
         // Si el login no es exitoso, mostramos el formulario de login
         <Container className="mt-5">

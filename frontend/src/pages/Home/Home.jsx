@@ -1,6 +1,6 @@
 const home = ()=>{
     return(
-        <div>You are Logged</div>
+        <div>Este es el inicio</div>
     );
 }
 
