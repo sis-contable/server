@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 // Importamos los estilos de Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
-// Importamos componentes adicionales para renderizar en caso de login exitoso
-import ListUsers from '../Users/ListUsers';
+
 // Importamos la función de login desde el archivo loginService.js
 import loginService from '../../services/loginService';
 import App from '../../App.jsx';
