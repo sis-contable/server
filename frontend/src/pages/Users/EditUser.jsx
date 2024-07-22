@@ -13,13 +13,14 @@ const EditUser = ({ user,  onClose, onSave}) => {
         setEditedUser(user);
     }, [user]);
 
-    const userTypeMap = {
-        1: 'Administrador',
-        2: 'Espectador'
-    };
+    
 
     // Función para manejar cambios en los campos del formulario
     const handleChange = (e) => {
+        const userTypeMap = {
+            1: 'Administrador',
+            2: 'Espectador'
+        };
         const { name, value } = e.target;
         // Si el campo es 'id_tipo_usuario', convertir el valor a número entero y pasarle el tipo de usuario
         if (name === 'id_tipo_usuario') {

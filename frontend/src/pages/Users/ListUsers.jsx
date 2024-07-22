@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import getListUsersService from '../../services/getListUsersService';
-import EditUser from './editUser';
-import DeleteUser from './deleteUser';
+import EditUser from './EditUser';
+import DeleteUser from './DeleteUser';
 
 // Componente funcional ListUsers
 const ListUsers = () => {
     // Definimos un estado llamado 'users' para almacenar la lista de usuarios
     const [users, setUsers] = useState([]); // Estado para almacenar la lista de usuarios
     const [showEditModal, setShowEditModal] = useState(false); // Estado para controlar la visibilidad del modal de edición
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para controlar la visibilidad del modal de edición
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para controlar la visibilidad del modal de eliminacion
     const [selectedUser, setSelectedUser] = useState(null); // Estado para almacenar el usuario seleccionado para editar
     const [selectedUserID, setSelectedUserID] = useState(null); // Estado para almacenar el ID del usuario seleccionado para eliminar
 
