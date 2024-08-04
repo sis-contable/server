@@ -1,6 +1,9 @@
 import Login from "../../pages/Login/Login";
 import ListUsers from "../../pages/Users/ListUsers";
+<<<<<<< HEAD
 import App from "../../App.jsx";
+=======
+>>>>>>> origin/osvaldo
 
 // Función para decodificar el JWT
 function parseJwt(token) {
@@ -26,7 +29,11 @@ if (token) {
 const Main = () => {
     return (
         <>
+<<<<<<< HEAD
             {tokenExiste ? <App/> : <Login />} 
+=======
+            {tokenExiste ? <ListUsers /> : <Login />} 
+>>>>>>> origin/osvaldo
         </>
     );
 }

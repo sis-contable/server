@@ -22,6 +22,6 @@ const loginService = async (data) => {
       throw error;
     }
   };
-
+  
   // Exportamos la función para que pueda ser utilizada en otros archivos
   export default loginService;

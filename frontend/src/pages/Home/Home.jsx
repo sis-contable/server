@@ -1,6 +1,10 @@
 const home = ()=>{
     return(
+<<<<<<< HEAD
         <div>Este es el inicio</div>
+=======
+        <div>You are Logged</div>
+>>>>>>> origin/osvaldo
     );
 }
 
