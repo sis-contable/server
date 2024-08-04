@@ -13,26 +13,17 @@ app.use(cors({
     //Aca agregamos el lugar donde egecutamos nuestro from
     origin: ["http://localhost:5173"],
     //Tipos de metodos que enviamos desde el from al back
-<<<<<<< HEAD
-    methods: ["GET", "POST"]
-=======
     methods: ["GET", "POST" , "PUT" , "DELETE"]
->>>>>>> origin/osvaldo
 }));
 
 //traemos el archivo donde se encuentran las rutas
 const allControllersUsers = require('./routers/allUsersRouters');
 app.use('/', allControllersUsers.login);
 app.use('/',allControllersUsers.listUsers);
-<<<<<<< HEAD
-
-app.listen(port, ()=>{
-    console.log('El puerto que esta escuchando es:' + port)
-=======
 app.use('/',allControllersUsers.editUser);
 app.use('/',allControllersUsers.deleteUser);
 
+
 app.listen(port, ()=>{
     console.log('El puerto que esta escuchando es:' + port);
->>>>>>> origin/osvaldo
 })
