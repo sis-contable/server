@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken');
 
 module.exports = async (request, response) => {
     const { usuario , clave } = request.body;
-    console.log(usuario);
-    console.log(clave);
     //Hacemos la consulta a la base de datos
     //const consult = 'SELECT * FROM usuarios WHERE usuario = ? and password = ?';
 
