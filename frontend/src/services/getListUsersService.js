@@ -10,8 +10,6 @@ const getListUsersService = async () => {
       });
       // Convertimos la respuesta del servidor a un objeto js
       const result = await responsUsers.json();
-      //Corroboramos que funciona
-      console.log('Resultado obtenido:', result);
       // Devolvemos el resultado para que pueda ser manejado en la lista
       return result;
     } catch (error) {

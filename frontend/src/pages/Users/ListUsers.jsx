@@ -21,7 +21,6 @@ const ListUsers = () => {
             const result = await getListUsersService();
             // Actualizamos el estado 'users' con los datos obtenidos
             setUsers(result[0]); // Establecer solo el primer elemento que contiene los usuarios
-            console.log(result[0])
         } catch (error) {
             console.error('Error fetching users:', error);// Si ocurre un error, lo mostramos en la consola
         }
