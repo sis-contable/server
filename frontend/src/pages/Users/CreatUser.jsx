@@ -3,17 +3,15 @@ import { Modal, Button, Form , InputGroup , Alert} from 'react-bootstrap';
 import editUserService from '../../services/editUserService';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const CreateUser = ({ user,  onClose, onSave}) => {
-    const [editedUser, setEditedUser] = useState(user); // Estado para almacenar los datos del usuario editado
+const CreatUser = ({ user,  onClose, onSave}) => {
+    const [creatUser, setCreatUser] = useState(user); // Estado para almacenar los datos del usuario editado
     const [showPassword, setShowPassword] = useState(false); // Estado para manejar la visibilidad de la contraseña
     const [showSuccess, setShowSuccess] = useState(false); // Estado para manejar el mensaje de cambios guardados
 
     // useEffect para actualizar el estado 'editedUser' cuando el 'user' prop cambie
     useEffect(() => {
-        setEditedUser(user);
+        setCreatUser(user);
     }, [user]);
-
-    
 
     // Función para manejar cambios en los campos del formulario
     const handleChange = (e) => {
@@ -25,20 +23,20 @@ const CreateUser = ({ user,  onClose, onSave}) => {
         // Si el campo es 'id_tipo_usuario', convertir el valor a número entero y pasarle el tipo de usuario
         if (name === 'id_tipo_usuario') {
             const newValue = parseInt(value, 10);
-            setEditedUser({ ...editedUser, [name]: newValue, tipo_usuario: userTypeMap[newValue] });
+            setCreatUser({ ...creatUser, [name]: newValue, tipo_usuario: userTypeMap[newValue] });
         } else {
-            setEditedUser({ ...editedUser, [name]: value });
+            setCreatUser({ ...creatUser, [name]: value });
         }
     };
 
      // Función para guardar los cambios y llamar a la función 'onSave' pasada como prop
      const handleSaveChanges = async () => {
-        const updatedUser = await editUserService(editedUser);
+        const updatedUser = await creatUserService(creatUser);
         if (updatedUser) {
             setShowSuccess(true); // Muestra la alerta
             setTimeout(() => {
                 setShowSuccess(false); // Oculta la alerta después de 2 segundos
-                onSave(updatedUser); // Llama a onSave con el usuario actualizado
+                onSave(creatUser); // Llama a onSave con el usuario actualizado
                 onClose(); // Cierra el modal
             },700); 
         }
@@ -58,7 +56,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                 {/* Mostrar la alerta si showSuccess es true */}
                 {showSuccess && (
                     <Alert variant="success" className="custom-alert">
-                        Usuario creado guardados con éxito.
+                        Usuario creado con éxito.
                     </Alert>
                 )}
                 <Form>
@@ -68,7 +66,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                         <Form.Control
                             type="text"
                             name="nombre"
-                            value={editedUser.nombre}
+                            value=""
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -140,4 +138,4 @@ const CreateUser = ({ user,  onClose, onSave}) => {
     );
 };
 
-export default CreateUser;
+export default CreatUser;
