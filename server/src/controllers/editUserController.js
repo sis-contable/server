@@ -14,7 +14,6 @@ module.exports = async (request, response) => {
         }
         // Convertir los datos del usuario actualizado a una cadena JSON
         let userJson = JSON.stringify(updatedUser);
-        console.log(updatedUser);
         // Ejecutar la consulta almacenada 'editUser' pasando los datos del usuario como parámetro
         conexion.query('CALL editUser(?)', [userJson], (error, result)=>{
             if (error) {

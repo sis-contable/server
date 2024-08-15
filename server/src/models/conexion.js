@@ -9,5 +9,4 @@ const conexion = mysql.createConnection({
     //trustServerCertificate: true
 });
 
-
 module.exports = conexion;

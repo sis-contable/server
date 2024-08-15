@@ -9,6 +9,7 @@ import DeleteUser from './DeleteUser';
 const ListUsers = () => {
     // Definimos un estado llamado 'users' para almacenar la lista de usuarios
     const [users, setUsers] = useState([]); // Estado para almacenar la lista de usuarios
+    const [showCreatModal, setShowCreatModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false); // Estado para controlar la visibilidad del modal de edición
     const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para controlar la visibilidad del modal de eliminacion
     const [selectedUser, setSelectedUser] = useState(null); // Estado para almacenar el usuario seleccionado para editar
@@ -21,7 +22,6 @@ const ListUsers = () => {
             const result = await getListUsersService();
             // Actualizamos el estado 'users' con los datos obtenidos
             setUsers(result[0]); // Establecer solo el primer elemento que contiene los usuarios
-            console.log(result[0])
         } catch (error) {
             console.error('Error fetching users:', error);// Si ocurre un error, lo mostramos en la consola
         }
@@ -32,6 +32,11 @@ const ListUsers = () => {
     useEffect(() => {
         fetchData();// Ejecutamos la función para obtener los datos
     }, []); 
+
+    // Función para manejar el clic en el botón de Crear
+    const handleCreatClick = () => {
+        setShowCreatModal(true);// Muestra el modal de edición
+    };
 
     // Función para manejar el clic en el botón de editar
     const handleEditClick = (user) => {
@@ -84,7 +89,7 @@ const ListUsers = () => {
             {/* Cabecera de la lista de usuarios */}
             <div className="d-flex justify-content-between align-items-center m-3">
                 <h2>Lista de usuarios</h2>
-                <button type="button" className="btn btn-primary">Crear Usuario</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleCreatClick()}>Crear Usuario</button>
             </div>
             {/* Contenedor de la lista de usuarios */}
             <div className="list-group">

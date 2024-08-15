@@ -3,14 +3,8 @@
   "version": "1.0.0",
   "main": "./stc/index.js",
   "scripts": {
-<<<<<<< HEAD
-    "dev": "nodemon ./src/index.js",
-    "start": "node index.js",
-    "startApp": "nodemon run ./src/app.js",
-=======
     "start": "node ./src/index.js",    
   "dev": "nodemon ./src/index.js",
->>>>>>> origin/osvaldo
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

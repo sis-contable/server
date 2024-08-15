@@ -8,14 +8,11 @@ const editUserService = async (editedUser) => {
             body: JSON.stringify(editedUser),
         });
         if (response.ok) {
-            console.log('Usuario actualizado con éxito');
             return editedUser;
         } else {
-            console.error('Error al actualizar usuario');
             return null;
         }
     } catch (error) {
-        console.error('Error al actualizar usuario:', error);
         return null;
     }
 };
