@@ -22,6 +22,7 @@ app.use('/', allControllersUsers.login);
 app.use('/',allControllersUsers.listUsers);
 app.use('/',allControllersUsers.editUser);
 app.use('/',allControllersUsers.deleteUser);
+app.use('/',allControllersUsers.createUser);
 
 app.listen(port, ()=>{
     console.log('El puerto que esta escuchando es:' + port);

@@ -1,5 +1,5 @@
 import Login from "../../pages/Login/Login";
-import ListUsers from "../../pages/Users/ListUsers";
+import App from "../../App";
 
 // Función para decodificar el JWT
 function parseJwt(token) {
