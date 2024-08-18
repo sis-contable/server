@@ -3,8 +3,8 @@ Content-Type: application/json
 
 {   
     "id_tipo_usuario" : 2, 
-    "nombre": "user123",
-    "usuario" : "user1234" ,
+    "nombre": "user1234",
+    "usuario" : "user12345" ,
     "password" : "asd-123" , 
-    "email": "1234user@example.com"
+    "email": "12345user@example.com"
 }

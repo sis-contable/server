@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-08-2024 a las 01:38:52
+-- Tiempo de generación: 19-08-2024 a las 01:54:41
 -- Versión del servidor: 8.0.32
 -- Versión de PHP: 8.2.4
 
@@ -46,9 +46,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
     
     SELECT COUNT(*) INTO user_exists
 	FROM usuarios
-	WHERE nombre COLLATE utf8mb4_0900_ai_ci = v_nombre
-    OR usuario COLLATE utf8mb4_0900_ai_ci = v_usuario 
-    OR email COLLATE utf8mb4_0900_ai_ci = v_email;
+	WHERE nombre COLLATE utf8mb4_spanish_ci = v_nombre
+    OR usuario COLLATE utf8mb4_spanish_ci = v_usuario 
+    OR email COLLATE utf8mb4_spanish_ci = v_email;
 
     IF user_exists > 0 THEN
     -- Si ya existe, se puede lanzar un error o manejar de otra forma
@@ -369,9 +369,9 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`id_usuario`, `id_tipo_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
 (1, 1, 'Lucia Bellome', 'Luci', '1234', 'luci@gmail.com'),
 (2, 1, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
-(8, 2, 'user', 'user1', 'asd-123', 'user@example.com'),
 (10, 2, 'user1', 'user12', 'asd-123', '12user@example.com'),
-(11, 2, 'user12', 'user123', 'asd-123', '123user@example.com');
+(11, 2, 'user12', 'user123', 'asd-123', '123user@example.com'),
+(12, 2, 'user1234', 'user12345', 'asd-123', '12345user@example.com');
 
 --
 -- Índices para tablas volcadas
@@ -489,7 +489,7 @@ ALTER TABLE `tipos_usuario`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Restricciones para tablas volcadas

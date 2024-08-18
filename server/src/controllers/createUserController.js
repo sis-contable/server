@@ -7,7 +7,7 @@ module.exports = async (request, response) => {
     
     try{    
         // Convertir los datos del usuario ingresado a una cadena JSON
-        let userJson = JSON.stringify(newdUser);
+        let userJson = JSON.stringify(newUser);
         // Ejecutar la consulta almacenada 'createUser' pasando los datos del usuario como parámetro
         conexion.query('CALL createUser(?)', [userJson], (error, result)=>{
             if (error) {
