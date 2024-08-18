@@ -4,11 +4,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import getListUsersService from '../../services/getListUsersService';
 import EditUser from './EditUser';
 import DeleteUser from './DeleteUser';
+import CreateUser from './CreateUser';
 
 // Componente funcional ListUsers
 const ListUsers = () => {
     // Definimos un estado llamado 'users' para almacenar la lista de usuarios
     const [users, setUsers] = useState([]); // Estado para almacenar la lista de usuarios
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false); // Estado para controlar la visibilidad del modal de edición
     const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para controlar la visibilidad del modal de eliminacion
     const [selectedUser, setSelectedUser] = useState(null); // Estado para almacenar el usuario seleccionado para editar
@@ -32,6 +34,11 @@ const ListUsers = () => {
         fetchData();// Ejecutamos la función para obtener los datos
     }, []); 
 
+    // Función para manejar el clic en el botón de Crear
+    const handleCreateClick = () => {
+        setShowCreateModal(true);// Muestra el modal de edición
+    };
+
     // Función para manejar el clic en el botón de editar
     const handleEditClick = (user) => {
         setSelectedUser(user);// Establece el usuario seleccionado en el estado
@@ -42,6 +49,14 @@ const ListUsers = () => {
     const handleDeleteClick = (userId) => {
         setSelectedUserID(userId); // Establece el ID del usuario
         setShowDeleteModal(true); // Muestra el modal de confirmación
+    };
+
+    // Función para manejar el guardado del nuevo usuario
+    const handleCreateSave = async (newUser) => {
+        // Aquí enviarías newUser al backend para guardarlo en la base de datos
+        // Suponiendo que el backend responde con el usuario creado, podrías hacer algo así:
+        setUsers([...users, newUser]); // Agrega el nuevo usuario al estado de 'users'
+        setShowCreateModal(false); // Oculta el modal de creación
     };
 
     // Función para manejar la actualización del usuario después de guardar cambios en el modal
@@ -76,6 +91,11 @@ const ListUsers = () => {
         setSelectedUserID(null); // Limpia el ID del usuario seleccionado
     };
 
+    // Función para cerrar el modal de eliminacion
+    const handleCloseCreate = () => {
+        setShowCreateModal(false); // Cierra el modal
+    };
+
     
 
     return (
@@ -83,8 +103,14 @@ const ListUsers = () => {
             {/* Cabecera de la lista de usuarios */}
             <div className="d-flex justify-content-between align-items-center m-3">
                 <h2>Lista de usuarios</h2>
-                <button type="button" className="btn btn-primary">Crear Usuario</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleCreateClick()}>Crear Usuario</button>
             </div>
+            {/* Modal para crear un nuevo usuario */}
+            <CreateUser
+                show={showCreateModal}
+                onCreate={handleCreateSave} // Pasa la función handleCreateSave como prop
+                onClose={handleCloseCreate} // Pasa la función handleCloseCreate como prop
+            />
             {/* Contenedor de la lista de usuarios */}
             <div className="list-group">
                 {/* Iteramos sobre el estado 'users' para mostrar cada usuario */}

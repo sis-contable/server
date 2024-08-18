@@ -6,8 +6,7 @@ const conexion = mysql.createConnection({
     user: 'root',
     password: '',
     database: 'sis_contable',
-    trustServerCertificate: true
+    //trustServerCertificate: true
 });
-
 
 module.exports = conexion;

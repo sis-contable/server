@@ -1,46 +1,36 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState } from 'react';
 import { Modal, Button, Form , InputGroup , Alert} from 'react-bootstrap';
-import editUserService from '../../services/editUserService';
+import createUserService from '../../services/createUserService'
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const CreateUser = ({ user,  onClose, onSave}) => {
-    const [editedUser, setEditedUser] = useState(user); // Estado para almacenar los datos del usuario editado
+const CreateUser = ({ show, onClose, onCreate }) => {
+    const [newUser, setNewUser] = useState({
+        nombre: '',
+        usuario: '',
+        password: '',
+        id_tipo_usuario: 1, //Valor por defecto
+        email: ''
+    })
     const [showPassword, setShowPassword] = useState(false); // Estado para manejar la visibilidad de la contraseña
     const [showSuccess, setShowSuccess] = useState(false); // Estado para manejar el mensaje de cambios guardados
-
-    // useEffect para actualizar el estado 'editedUser' cuando el 'user' prop cambie
-    useEffect(() => {
-        setEditedUser(user);
-    }, [user]);
-
     
-
     // Función para manejar cambios en los campos del formulario
     const handleChange = (e) => {
-        const userTypeMap = {
-            1: 'Administrador',
-            2: 'Espectador'
-        };
-        const { name, value } = e.target;
-        // Si el campo es 'id_tipo_usuario', convertir el valor a número entero y pasarle el tipo de usuario
-        if (name === 'id_tipo_usuario') {
-            const newValue = parseInt(value, 10);
-            setEditedUser({ ...editedUser, [name]: newValue, tipo_usuario: userTypeMap[newValue] });
-        } else {
-            setEditedUser({ ...editedUser, [name]: value });
-        }
+        const {name, value} = e.target;
+        setNewUser({ newUser, [name]: value });
     };
 
-     // Función para guardar los cambios y llamar a la función 'onSave' pasada como prop
-     const handleSaveChanges = async () => {
-        const updatedUser = await editUserService(editedUser);
-        if (updatedUser) {
+     // Función para guardar los cambios y llamar a la función 'onCreate' pasada como prop
+     const handleCreateUser = async () => {
+        const createdUser = await createUserService(newUser);
+        if(createdUser){
             setShowSuccess(true); // Muestra la alerta
             setTimeout(() => {
                 setShowSuccess(false); // Oculta la alerta después de 2 segundos
-                onSave(updatedUser); // Llama a onSave con el usuario actualizado
-                onClose(); // Cierra el modal
-            },700); 
+                onCreate(createdUser); // Llama a onCreate con el nuevo usuario creado
+                onClose();//Cierra el modal
+            },700);
+            
         }
     };
 
@@ -50,7 +40,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
     };
 
     return (
-        <Modal show={true} onHide={onClose}>
+        <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
                 <Modal.Title>Crear Usuario</Modal.Title>
             </Modal.Header>
@@ -58,7 +48,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                 {/* Mostrar la alerta si showSuccess es true */}
                 {showSuccess && (
                     <Alert variant="success" className="custom-alert">
-                        Usuario creado guardados con éxito.
+                        Usuario creado con éxito.
                     </Alert>
                 )}
                 <Form>
@@ -68,7 +58,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                         <Form.Control
                             type="text"
                             name="nombre"
-                            value={editedUser.nombre}
+                            value={newUser.nombre}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -78,7 +68,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                         <Form.Control
                             type="text"
                             name="usuario"
-                            value={editedUser.usuario}
+                            value={newUser.usuario}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -89,7 +79,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                             <Form.Control
                                 type={showPassword ? 'text' : 'password'}
                                 name="password"
-                                value={editedUser.password}
+                                value={newUser.password}
                                 onChange={handleChange}
                                 aria-describedby="password-addon"
                             />
@@ -110,7 +100,7 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                         <Form.Label>Tipo de Usuario</Form.Label>
                         <Form.Select
                             name="id_tipo_usuario"
-                            value={editedUser.id_tipo_usuario}
+                            value={newUser.id_tipo_usuario}
                             onChange={handleChange}
                         >
                             <option value="1">Administrador</option>
@@ -123,18 +113,18 @@ const CreateUser = ({ user,  onClose, onSave}) => {
                         <Form.Control
                             type="text"
                             name="email"
-                            value={editedUser.email}
+                            value={newUser.email}
                             onChange={handleChange}
                         />
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
+                {/* Botón para guardar cambios y cerrar el modal */}
+                <Button variant="primary" onClick={handleCreateUser}>Guardar</Button>
+                {/* Mostrar la alerta si showSuccess es true */}
                 {/* Botón para cerrar el modal sin guardar cambios */}
                 <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-                {/* Botón para guardar cambios y cerrar el modal */}
-                <Button variant="primary" onClick={handleSaveChanges}>Guardar</Button>
-                {/* Mostrar la alerta si showSuccess es true */}
             </Modal.Footer>
         </Modal>
     );
