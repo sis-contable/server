@@ -17,7 +17,7 @@ const CreateUser = ({ show, onClose, onCreate }) => {
     // Función para manejar cambios en los campos del formulario
     const handleChange = (e) => {
         const {name, value} = e.target;
-        setNewUser({ newUser, [name]: value });
+        setNewUser({ ...newUser, [name]: value });
     };
 
      // Función para guardar los cambios y llamar a la función 'onCreate' pasada como prop
@@ -29,7 +29,7 @@ const CreateUser = ({ show, onClose, onCreate }) => {
                 setShowSuccess(false); // Oculta la alerta después de 2 segundos
                 onCreate(createdUser); // Llama a onCreate con el nuevo usuario creado
                 onClose();//Cierra el modal
-            },700);
+            },900);
             
         }
     };

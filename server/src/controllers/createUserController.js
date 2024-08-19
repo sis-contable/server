@@ -3,11 +3,9 @@ const conexion = require('../models/conexion');
 module.exports = async (request, response) => {
     
     // Obtener los datos actualizados del usuario del cuerpo de la solicitud
-    const updatedUser = request.body;
+    const newUser = request.body;
     
     try{    
-        // Convertir los datos del usuario ingresado a una cadena JSON
-        let userJson = JSON.stringify(updatedUser);
         // Ejecutar la consulta almacenada 'createUser' pasando los datos del usuario como parámetro
         conexion.query('CALL createUser(?)', [userJson], (error, result)=>{
             if (error) {
