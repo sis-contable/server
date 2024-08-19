@@ -1,22 +1,20 @@
 const conexion = require('../models/conexion');
 
 module.exports = async (request, response) => {
-    
-    // Obtener los datos actualizados del usuario del cuerpo de la solicitud
     const newUser = request.body;
-    
-    try{    
-        // Ejecutar la consulta almacenada 'createUser' pasando los datos del usuario como parámetro
-        conexion.query('CALL createUser(?)', [userJson], (error, result)=>{
+
+    try {
+        let userJson = JSON.stringify(newUser);
+        conexion.query('CALL createUser(?)', [userJson], (error, result) => {
             if (error) {
-                response.status(500).send(error);
+                console.error('Error al ejecutar la consulta:', error); // Agregar un log para depuración
+                response.status(500).send({ message: 'Error al crear el usuario', error: error.message });
             } else {
-                response.status(200).send(`Usuario creado`);
+                response.status(200).send({ message: 'Usuario creado exitosamente' });
             }
         });
-    } catch(e){
-        // Capturar cualquier otro error
-        response.send(e);
-
+    } catch (e) {
+        console.error('Error inesperado:', e); // Agregar un log para depuración
+        response.status(500).send({ message: 'Error interno del servidor', error: e.message });
     }
 };

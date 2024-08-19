@@ -55,7 +55,15 @@ const ListUsers = () => {
     const handleCreateSave = async (newUser) => {
         // Aquí enviarías newUser al backend para guardarlo en la base de datos
         // Suponiendo que el backend responde con el usuario creado, podrías hacer algo así:
-        setUsers([...users, newUser]); // Agrega el nuevo usuario al estado de 'users'
+        if(newUser){
+            // Definir el tipo de usuario basado en el id
+            const tipoUsuario = newUser.id_tipo_usuario === 1 ? 'Administrador' : 'Espectador';
+            // Agregar el nuevo usuario al estado
+            setUsers([...users, {
+                nombre: newUser.nombre,
+                tipo_usuario: tipoUsuario,
+            }]);
+        }
         setShowCreateModal(false); // Oculta el modal de creación
     };
 
