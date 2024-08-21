@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-08-2024 a las 01:54:41
--- Versión del servidor: 8.0.32
--- Versión de PHP: 8.2.4
+-- Tiempo de generación: 20-08-2024 a las 13:48:01
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -59,7 +59,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
 
 		IF total_users >= 5 THEN
 			-- Si ya hay 5 usuarios, se lanza un error
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se pueden crear más de 5 usuarios';
+			SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'No se pueden crear más de 5 usuarios';
 		ELSE
 		
 			-- Iniciar la transacción
@@ -186,14 +186,14 @@ DELIMITER ;
 --
 
 CREATE TABLE `caja_registro` (
-  `id_caja_registro` int NOT NULL,
-  `id_usuario` int NOT NULL,
-  `id_categoria` int NOT NULL,
-  `id_rubro` int NOT NULL,
-  `id_forma_pago` int NOT NULL,
-  `id_cuenta` int NOT NULL,
+  `id_caja_registro` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_categoria` int(11) NOT NULL,
+  `id_rubro` int(11) NOT NULL,
+  `id_forma_pago` int(11) NOT NULL,
+  `id_cuenta` int(11) NOT NULL,
   `fecha_registrop` datetime NOT NULL,
-  `descripcion` varchar(300) COLLATE utf8mb4_spanish_ci NOT NULL,
+  `descripcion` varchar(300) NOT NULL,
   `debe` decimal(10,2) DEFAULT NULL,
   `haber` decimal(10,2) DEFAULT NULL,
   `gestion` tinyint(1) NOT NULL
@@ -206,8 +206,8 @@ CREATE TABLE `caja_registro` (
 --
 
 CREATE TABLE `categorias` (
-  `id_categoria` int NOT NULL,
-  `categoria` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_categoria` int(11) NOT NULL,
+  `categoria` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- --------------------------------------------------------
@@ -217,8 +217,8 @@ CREATE TABLE `categorias` (
 --
 
 CREATE TABLE `cuentas` (
-  `id_cuenta` int NOT NULL,
-  `cuenta` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_cuenta` int(11) NOT NULL,
+  `cuenta` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- --------------------------------------------------------
@@ -228,8 +228,8 @@ CREATE TABLE `cuentas` (
 --
 
 CREATE TABLE `formas_pago` (
-  `id_forma_pago` int NOT NULL,
-  `forma_pago` varchar(150) COLLATE utf8mb4_spanish_ci DEFAULT NULL
+  `id_forma_pago` int(11) NOT NULL,
+  `forma_pago` varchar(150) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- --------------------------------------------------------
@@ -239,8 +239,8 @@ CREATE TABLE `formas_pago` (
 --
 
 CREATE TABLE `grupos` (
-  `id_grupo` int NOT NULL,
-  `grupo` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_grupo` int(11) NOT NULL,
+  `grupo` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -261,10 +261,10 @@ INSERT INTO `grupos` (`id_grupo`, `grupo`) VALUES
 --
 
 CREATE TABLE `rubros` (
-  `id_rubro` int NOT NULL,
-  `id_grupo` int DEFAULT NULL,
-  `id_tipo` int DEFAULT NULL,
-  `rubro` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_rubro` int(11) NOT NULL,
+  `id_grupo` int(11) DEFAULT NULL,
+  `id_tipo` int(11) DEFAULT NULL,
+  `rubro` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -316,8 +316,8 @@ INSERT INTO `rubros` (`id_rubro`, `id_grupo`, `id_tipo`, `rubro`) VALUES
 --
 
 CREATE TABLE `tipos` (
-  `id_tipo` int NOT NULL,
-  `tipo` varchar(12) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_tipo` int(11) NOT NULL,
+  `tipo` varchar(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -335,8 +335,8 @@ INSERT INTO `tipos` (`id_tipo`, `tipo`) VALUES
 --
 
 CREATE TABLE `tipos_usuario` (
-  `id_tipo_usuario` int NOT NULL,
-  `tipo_usuario` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_tipo_usuario` int(11) NOT NULL,
+  `tipo_usuario` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -354,12 +354,12 @@ INSERT INTO `tipos_usuario` (`id_tipo_usuario`, `tipo_usuario`) VALUES
 --
 
 CREATE TABLE `usuarios` (
-  `id_usuario` int NOT NULL,
-  `id_tipo_usuario` int NOT NULL,
-  `nombre` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
-  `usuario` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
-  `password` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
-  `email` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
+  `id_usuario` int(11) NOT NULL,
+  `id_tipo_usuario` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `usuario` varchar(150) NOT NULL,
+  `password` varchar(150) NOT NULL,
+  `email` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -369,9 +369,7 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`id_usuario`, `id_tipo_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
 (1, 1, 'Lucia Bellome', 'Luci', '1234', 'luci@gmail.com'),
 (2, 1, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
-(10, 2, 'user1', 'user12', 'asd-123', '12user@example.com'),
-(11, 2, 'user12', 'user123', 'asd-123', '123user@example.com'),
-(12, 2, 'user1234', 'user12345', 'asd-123', '12345user@example.com');
+(20, 2, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
 
 --
 -- Índices para tablas volcadas
@@ -447,49 +445,49 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `cuentas`
 --
 ALTER TABLE `cuentas`
-  MODIFY `id_cuenta` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_cuenta` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `formas_pago`
 --
 ALTER TABLE `formas_pago`
-  MODIFY `id_forma_pago` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_forma_pago` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `grupos`
 --
 ALTER TABLE `grupos`
-  MODIFY `id_grupo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_grupo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`
 --
 ALTER TABLE `rubros`
-  MODIFY `id_rubro` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id_rubro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos`
 --
 ALTER TABLE `tipos`
-  MODIFY `id_tipo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_usuario`
 --
 ALTER TABLE `tipos_usuario`
-  MODIFY `id_tipo_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Restricciones para tablas volcadas
