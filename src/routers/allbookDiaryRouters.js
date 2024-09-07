@@ -1,11 +1,13 @@
 //Importamos los controladores
-const bookIva = require('./loginRouter');
+const creatRegisterBook = require('./createRegisterBookDiaryRouter');
+const listBookDiary = requiere('./getListoBoo');
 
 
 //Controlador general (orquestador o organizador), un array que tiene todo los routers.
 //// El 'orquestador' es un mediador entre los controladores y nuestro 'app.js'.
 const allControllersBook = {
-    bookIva
+    creatRegisterBook,
+    listBookDiary
 };
 
 //Aca le brindamos acceso para que puedan tomar el dato que necesitan,

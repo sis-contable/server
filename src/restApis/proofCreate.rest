@@ -1,10 +1,19 @@
-POST  http://localhost:3000/createUser
+POST  http://localhost:3000/createRegisterBookDiary
 Content-Type: application/json
 
-{   
-    "id_tipo_usuario" : 2, 
-    "nombre": "user1234",
-    "usuario" : "user12345" ,
-    "password" : "asd-123" , 
-    "email": "12345user@example.com"
+{
+    "id_libro_diario": null,
+    "id_usuario": 1,
+    "id_grupo": 1,
+    "id_tipo": 1,
+    "id_rubro": 1,
+    "id_sub_rubro": 1,
+    "id_forma_pago": 1,
+    "id_cuenta": 1,
+    "fecha_registro": "2024-09-07",
+    "descripcion": "Pago proveedor",
+    "debe": 0,
+    "haber": 1500,
+    "gestion": 1,
+    "codigo_cuentas": null
 }
