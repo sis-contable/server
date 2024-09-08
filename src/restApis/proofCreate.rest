@@ -2,7 +2,6 @@ POST  http://localhost:3000/createRegisterBookDiary
 Content-Type: application/json
 
 {
-    "id_libro_diario": null,
     "id_usuario": 1,
     "id_grupo": 1,
     "id_tipo": 1,
@@ -10,10 +9,10 @@ Content-Type: application/json
     "id_sub_rubro": 1,
     "id_forma_pago": 1,
     "id_cuenta": 1,
-    "fecha_registro": "2024-09-07",
+    "fecha_registro": "2024-09-08",
     "descripcion": "Pago proveedor",
-    "debe": 0,
-    "haber": 1500,
+    "debe": 1500,
+    "haber": 0,
     "gestion": 1,
-    "codigo_cuentas": null
+    "codigo_cuenta": ""
 }

@@ -3,6 +3,6 @@ const { Router } = require('express');
 const listBookDiary = require('../controllers/getListBookDiaryController');
 
 const app = Router();
-app.post('/listBookDiary', listBookDiary);
+app.get('/listBookDiary', listBookDiary);
 
 module.exports = app;

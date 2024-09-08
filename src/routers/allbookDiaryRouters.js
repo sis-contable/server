@@ -1,6 +1,6 @@
 //Importamos los controladores
 const creatRegisterBook = require('./createRegisterBookDiaryRouter');
-const listBookDiary = requiere('./getListoBoo');
+const listBookDiary = require('./getListBookDiaryRouter.js');
 
 
 //Controlador general (orquestador o organizador), un array que tiene todo los routers.

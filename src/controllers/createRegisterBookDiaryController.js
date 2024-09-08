@@ -5,7 +5,7 @@ module.exports = async (request, response) => {
     // Concatenar los valores de id_grupo, id_tipo, id_rubro, id_sub_rubro, id_cuenta
     const codigoCuentas = `${registro.id_grupo}.${registro.id_tipo}.${registro.id_rubro}.${registro.id_sub_rubro}.${registro.id_cuenta}`;
     // Asignar el valor de codigo_cuentas al objeto JSON recibido
-    registro.codigo_cuentas = codigoCuentas;
+    registro.codigo_cuenta = codigoCuentas;
 
     console.log(registro);
     try {
