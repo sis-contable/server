@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-09-2024 a las 02:14:35
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 09-09-2024 a las 20:09:06
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -144,8 +144,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `editUser` (IN `dataJson` JSON)   BE
     END IF;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAccounts` ()   begin
+	SELECT * FROM `cuentas`;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAllUser` ()   begin
 	select * from usuarios; 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getGroupDiary` ()   begin
+	SELECT * FROM `grupos` WHERE 1;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
@@ -162,6 +170,27 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 	tipos_usuario.tipo_usuario , usuarios.password , usuarios.email  from usuarios , tipos_usuario
 	where usuarios.id_tipo_usuario = tipos_usuario.id_tipo_usuario;
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaymentMethods` ()   begin
+	SELECT * FROM `formas_pago`;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRubro` (IN `id_g` INT, IN `id_t` INT)   BEGIN
+	SELECT id_rubro, rubro 
+	FROM rubros 
+	WHERE id_grupo = id_g 
+	AND id_tipo = id_t;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSubRubro` (IN `id_ru` INT)   BEGIN
+	SELECT id_sub_rubro, sub_rubro
+	FROM sub_rubros
+	WHERE id_rubro = id_ru;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getType` ()   begin
+	SELECT * FROM `tipos` ;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJson` JSON)   begin
@@ -465,7 +494,86 @@ CREATE TABLE `sub_rubros` (
 --
 
 INSERT INTO `sub_rubros` (`id_sub_rubro`, `id_rubro`, `sub_rubro`) VALUES
-(1, 10, 'gastos');
+(1, 1, 'Caja en Pesos'),
+(2, 1, 'Caja en Dólares'),
+(3, 1, 'Bancos en Pesos'),
+(4, 1, 'Bancos en Dólares'),
+(5, 2, 'Plazos Fijos en Pesos'),
+(6, 2, 'Plazos Fijos en Dólares'),
+(7, 2, 'Bonos de Corto Plazo'),
+(8, 2, 'Acciones'),
+(9, 3, 'Cuentas por Cobrar a Clientes'),
+(10, 3, 'Cuentas por Cobrar Diversas'),
+(11, 3, 'Préstamos Otorgados a Corto Plazo'),
+(12, 3, 'Otros Créditos'),
+(13, 4, 'Mercaderías'),
+(14, 4, 'Materias Primas'),
+(15, 4, 'Productos Terminados'),
+(16, 4, 'Productos en Proceso'),
+(17, 5, 'Anticipos a Proveedores'),
+(18, 5, 'Anticipos a Empleados'),
+(19, 6, 'Créditos Diversos'),
+(20, 6, 'Créditos por Ajustes'),
+(21, 7, 'Equipos de Oficina'),
+(22, 7, 'Vehículos'),
+(23, 8, 'Bonos a Largo Plazo'),
+(24, 8, 'Acciones a Largo Plazo'),
+(25, 9, 'Propiedades Comerciales'),
+(26, 9, 'Propiedades Residenciales'),
+(27, 10, 'Patentes'),
+(28, 10, 'Marcas Registradas'),
+(29, 11, 'Deudas a Proveedores'),
+(30, 11, 'Deudas Diversas'),
+(31, 12, 'Préstamos Bancarios a Corto Plazo'),
+(32, 12, 'Préstamos Personales a Corto Plazo'),
+(33, 13, 'Salarios a Pagar'),
+(34, 13, 'Cargas Sociales a Pagar'),
+(35, 14, 'Provisión para Impuestos'),
+(36, 14, 'Provisión para Contingencias'),
+(37, 15, 'IVA por Pagar'),
+(38, 15, 'Impuesto a las Ganancias por Pagar'),
+(39, 16, 'Préstamos Bancarios a Largo Plazo'),
+(40, 16, 'Préstamos Personales a Largo Plazo'),
+(41, 17, 'Obligaciones por Emisión de Bonos'),
+(42, 17, 'Obligaciones por Créditos a Largo Plazo'),
+(43, 18, 'Provisión para Jubilaciones'),
+(44, 18, 'Provisión para Litigios'),
+(45, 26, 'Aportes en Efectivo'),
+(46, 26, 'Aportes en Especie'),
+(47, 27, 'Capital Social Suscrito'),
+(48, 27, 'Capital Social Pagado'),
+(49, 28, 'Prima por Emisión de Acciones'),
+(50, 28, 'Prima por Emisión de Bonos'),
+(51, 29, 'Resultados del Ejercicio Anterior'),
+(52, 29, 'Resultados de Ejercicios Anteriores'),
+(53, 30, 'Reserva Legal'),
+(54, 30, 'Reserva para Contingencias'),
+(55, 31, 'Resultados Acumulados del Ejercicio'),
+(56, 31, 'Resultados Acumulados de Ejercicios Anteriores'),
+(57, 32, 'Resultado del Ejercicio Actual'),
+(58, 32, 'Resultado del Ejercicio Anterior'),
+(59, 33, 'Ventas de Productos'),
+(60, 33, 'Ventas de Servicios'),
+(61, 34, 'Servicios Profesionales'),
+(62, 34, 'Servicios Técnicos'),
+(63, 35, 'Intereses Ganados'),
+(64, 35, 'Dividendos Recibidos'),
+(65, 36, 'Ingresos por Venta de Activos'),
+(66, 36, 'Ingresos por Alquileres'),
+(67, 37, 'Ingresos por Venta de Bienes No Operacionales'),
+(68, 37, 'Ingresos por Ganancias Excepcionales'),
+(69, 38, 'Costo de Mercaderías Vendidas'),
+(70, 38, 'Costo de Producción'),
+(71, 39, 'Gastos de Oficina'),
+(72, 39, 'Gastos de Sueldos Administrativos'),
+(73, 40, 'Gastos de Publicidad'),
+(74, 40, 'Gastos de Ventas'),
+(75, 41, 'Intereses Pagados'),
+(76, 41, 'Comisiones Financieras'),
+(77, 42, 'Gastos de Mantenimiento'),
+(78, 42, 'Gastos de Servicios Públicos'),
+(79, 43, 'Pérdidas por Venta de Activos'),
+(80, 43, 'Gastos por Multas');
 
 -- --------------------------------------------------------
 
@@ -643,7 +751,7 @@ ALTER TABLE `rubros`
 -- AUTO_INCREMENT de la tabla `sub_rubros`
 --
 ALTER TABLE `sub_rubros`
-  MODIFY `id_sub_rubro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_sub_rubro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos`
