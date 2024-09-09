@@ -28,6 +28,7 @@ app.use('/',allControllersUsers.createUser);
 const allControllersBook = require('./routers/allbookDiaryRouters');
 app.use('/', allControllersBook.creatRegisterBook);
 app.use('/', allControllersBook.listBookDiary);
+app.use('/', allControllersBook.selectRegisterBookDiary);
 
 
 app.listen(port, ()=>{
