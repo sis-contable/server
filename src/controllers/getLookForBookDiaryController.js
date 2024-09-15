@@ -2,10 +2,10 @@ const conexion = require('../models/conexion');
 
 //Buscador por palabra
 module.exports.getShareBookDiaryWord = async (request, response) => {
-    const shareWord = request.body;
+    const LookForWord = request.body;
 
     try {
-        conexion.query('CALL getShareBookDiaryWord(?)', [shareWord], (error, result) => {
+        conexion.query('CALL getLookForBookDiaryWord(?)', [LookForWord], (error, result) => {
             
             if (error) {
                 
@@ -23,11 +23,11 @@ module.exports.getShareBookDiaryWord = async (request, response) => {
 };
 
 //Buscador por fecha
-module.exports.getShareBookDiaryDate = async (request, response) => {
-    const shareDate = request.body;
+module.exports.getLookForBookDiaryDate = async (request, response) => {
+    const LookForDate = request.body;
 
     try {
-        conexion.query('CALL getShareBookDiary(?)', [JSON.stringify(shareDateJson)], (error, result) => {
+        conexion.query('CALL getLookForBookDiaryDate(?)', [JSON.stringify(LookForDate)], (error, result) => {
             
             if (error) {
                 

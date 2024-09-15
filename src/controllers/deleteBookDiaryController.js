@@ -1,6 +1,7 @@
 const conexion = require('../models/conexion');
 
 module.exports = async (request, response) => {
+    
     const selectIdBookDiary = request.body;
     // Concatenar los valores de id_grupo, id_tipo, id_rubro, id_sub_rubro, id_cuenta
     const codigoCuenta = `${selectIdBookDiary.id_grupo}.${selectIdBookDiary.id_tipo}.${selectIdBookDiary.id_rubro}.${selectIdBookDiary.id_sub_rubro}.${selectIdBookDiary.id_cuenta}`;
