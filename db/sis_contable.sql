@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-09-2024 a las 00:26:37
+-- Tiempo de generación: 16-09-2024 a las 00:36:48
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.0.28
 
@@ -234,18 +234,18 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaymentMethods` ()   begin
-	SELECT * FROM `formas_pago`;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `dataJson` JSON)   begin
+	DECLARE v_fecha_desde DATE;
+    DECLARE v_fecha_hasta DATE;
+
+    -- Extraer valores del JSON
+    SET v_fecha_desde = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_desde'));
+    SET v_fecha_hasta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_hasta'));
+   
+   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN fache_desde AND fache_hasta;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getRubro` (IN `id_g` INT, IN `id_t` INT)   BEGIN
-	SELECT id_rubro, rubro 
-	FROM rubros 
-	WHERE id_grupo = id_g 
-	AND id_tipo = id_t;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getShareBookDiary` (IN `share` VARCHAR(50))   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryWord` (IN `LookFor` VARCHAR(50))   BEGIN
 	SELECT libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
 		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
 		   libro_diario.haber, libro_diario.gestion 
@@ -256,27 +256,27 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getShareBookDiary` (IN `share` VARC
 	JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
 	JOIN grupos ON rubros.id_grupo = grupos.id_grupo
 	JOIN tipos ON rubros.id_tipo = tipos.id_tipo
-	WHERE grupos.grupo LIKE CONCAT('%', share, '%')
-	   OR tipos.tipo LIKE CONCAT('%', share, '%')
-	   OR rubros.rubro LIKE CONCAT('%', share, '%')
-	   OR sub_rubros.sub_rubro LIKE CONCAT('%', share, '%')
-	   OR formas_pago.forma_pago LIKE CONCAT('%', share, '%')
-	   OR cuentas.cuenta LIKE CONCAT('%', share, '%')
-	   OR libro_diario.descripcion LIKE CONCAT('%', share, '%')
-	   OR libro_diario.debe LIKE CONCAT('%', share, '%')
-	   OR libro_diario.haber LIKE CONCAT('%', share, '%')
-	   OR libro_diario.gestion LIKE CONCAT('%', share, '%');
+	WHERE grupos.grupo LIKE CONCAT('%', LookFor, '%')
+	   OR tipos.tipo LIKE CONCAT('%', LookFor, '%')
+	   OR rubros.rubro LIKE CONCAT('%', LookFor, '%')
+	   OR sub_rubros.sub_rubro LIKE CONCAT('%', LookFor, '%')
+	   OR formas_pago.forma_pago LIKE CONCAT('%', LookFor, '%')
+	   OR cuentas.cuenta LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.descripcion LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.debe LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.haber LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.gestion LIKE CONCAT('%', LookFor, '%');
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getShareBookDiaryDate` (IN `dataJson` JSON)   begin
-	DECLARE v_fecha_desde DATE;
-    DECLARE v_fecha_hasta DATE;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaymentMethods` ()   begin
+	SELECT * FROM `formas_pago`;
+END$$
 
-    -- Extraer valores del JSON
-    SET v_fecha_desde = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_desde'));
-    SET v_fecha_hasta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_hasta'));
-   
-   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN fache_desde AND fache_hasta;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRubro` (IN `id_g` INT, IN `id_t` INT)   BEGIN
+	SELECT id_rubro, rubro 
+	FROM rubros 
+	WHERE id_grupo = id_g 
+	AND id_tipo = id_t;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSubRubro` (IN `id_ru` INT)   BEGIN

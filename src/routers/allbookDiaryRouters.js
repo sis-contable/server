@@ -2,7 +2,7 @@
 const creatRegisterBook = require('./createRegisterBookDiaryRouter');
 const listBookDiary = require('./getListBookDiaryRouter.js');
 const selectRegisterBookDiary = require('./selectRegisterBookDiaryRouter.js');
-const ShareBookDiary = require('./shareBookDiaryRouter.js');
+const LookForBookDiary = require('./LookForBookDiaryRouter.js');
 const deleteBookDiary = require('./deleteBookDiaryRouter.js');
 
 
@@ -12,7 +12,7 @@ const allControllersBook = {
     creatRegisterBook,
     listBookDiary,
     selectRegisterBookDiary,
-    ShareBookDiary,
+    LookForBookDiary,
     deleteBookDiary
 };
 
