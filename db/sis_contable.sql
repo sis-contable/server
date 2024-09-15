@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-09-2024 a las 20:09:06
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 16-09-2024 a las 00:26:37
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -80,6 +80,68 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
 		END IF;
     END IF;
 END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT, IN `v_codigo_cuenta` VARCHAR(50))   begin
+	
+	DECLARE error_code INT DEFAULT 0;
+    DECLARE cuenta_exist INT DEFAULT 0;
+    -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_debe DOUBLE;
+    DECLARE v_haber DOUBLE;
+   -- ID plan de cuenta
+   	DECLARE v_saldo_actual DOUBLE;
+   	DECLARE v_saldo_acumulado DOUBLE;
+    DECLARE v_saldo_inicial DOUBLE;
+   
+	-- Iniciar transacción
+    START TRANSACTION;
+   		SELECT debe, haber INTO v_debe, v_haber
+	        FROM libro_diario
+	        WHERE id_libro_diario = v_id_libro_diario;
+    -- Realizamos el DELETE
+        DELETE FROM `libro_diario` WHERE id_libro_diario = v_id_libro_diario;
+       
+	-- Sumamos o Restamos de la cuenta y si la caja queda en 0 la eliminamos.
+        SELECT saldo_incial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
+        FROM plan_cuenta
+        WHERE codigo_cuenta = v_codigo_cuenta;
+
+        -- Actualizar los saldos según el debe y haber
+    	IF v_debe != 0 then
+       		SET v_saldo_inicial = v_saldo_inicial - v_debe;
+        ELSE
+       		SET v_saldo_inicial = v_saldo_inicial + v_haber;
+        END IF;
+       
+	    IF v_saldo_inicial != 0 then
+	    	IF v_debe != 0 then
+		        SET v_saldo_actual = v_saldo_actual - v_debe;
+	        	SET v_saldo_acumulado = v_saldo_acumulado - v_debe;
+	        ELSE
+	        	SET v_saldo_actual = v_saldo_actual + v_haber;
+	        	SET v_saldo_acumulado = v_saldo_acumulado + v_haber;
+	        END IF;
+	       -- Actualizar la cuenta en plan_cuenta
+	        UPDATE plan_cuenta
+	        SET saldo_actual = v_saldo_actual,
+	            saldo_acumulado = v_saldo_acumulado
+	        WHERE codigo_cuenta = v_codigo_cuenta;
+	       
+		ELSE
+	    	DELETE FROM `plan_cuenta` WHERE codigo_cuenta = v_codigo_cuenta;
+	    	
+	       
+	        -- Verificar si hubo un error
+	        GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO;
+	        IF error_code != 0 THEN
+	            ROLLBACK;
+	            SELECT 'Ha ocurrido un error durante la operación' AS MESSAGE;
+	        ELSE
+	            COMMIT;
+	            SELECT 'Operación completada exitosamente' AS MESSAGE;
+	        END IF;
+    	END IF;
+	END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteUser` (IN `id` INT)   BEGIN 
     DECLARE error_code INT DEFAULT 0;
@@ -183,6 +245,40 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getRubro` (IN `id_g` INT, IN `id_t`
 	AND id_tipo = id_t;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getShareBookDiary` (IN `share` VARCHAR(50))   BEGIN
+	SELECT libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
+		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
+		   libro_diario.haber, libro_diario.gestion 
+	FROM libro_diario
+	JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+	JOIN formas_pago ON libro_diario.id_forma_pago = formas_pago.id_forma_pago
+	JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
+	JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+	JOIN grupos ON rubros.id_grupo = grupos.id_grupo
+	JOIN tipos ON rubros.id_tipo = tipos.id_tipo
+	WHERE grupos.grupo LIKE CONCAT('%', share, '%')
+	   OR tipos.tipo LIKE CONCAT('%', share, '%')
+	   OR rubros.rubro LIKE CONCAT('%', share, '%')
+	   OR sub_rubros.sub_rubro LIKE CONCAT('%', share, '%')
+	   OR formas_pago.forma_pago LIKE CONCAT('%', share, '%')
+	   OR cuentas.cuenta LIKE CONCAT('%', share, '%')
+	   OR libro_diario.descripcion LIKE CONCAT('%', share, '%')
+	   OR libro_diario.debe LIKE CONCAT('%', share, '%')
+	   OR libro_diario.haber LIKE CONCAT('%', share, '%')
+	   OR libro_diario.gestion LIKE CONCAT('%', share, '%');
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getShareBookDiaryDate` (IN `dataJson` JSON)   begin
+	DECLARE v_fecha_desde DATE;
+    DECLARE v_fecha_hasta DATE;
+
+    -- Extraer valores del JSON
+    SET v_fecha_desde = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_desde'));
+    SET v_fecha_hasta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_hasta'));
+   
+   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN fache_desde AND fache_hasta;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSubRubro` (IN `id_ru` INT)   BEGIN
 	SELECT id_sub_rubro, sub_rubro
 	FROM sub_rubros
@@ -262,9 +358,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
 
 	       -- Actualizar los saldos según el debe y haber
 	    	IF v_debe != 0 then
-	        	SET v_saldo_actual = -v_debe;
+	        	SET v_saldo_actual = v_debe;
 	        ELSE
-	        	SET v_saldo_actual = v_haber;
+	        	SET v_saldo_actual = -v_haber;
 	        END IF;
 	
 	        -- Realizar el insert
