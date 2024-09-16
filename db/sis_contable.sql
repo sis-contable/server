@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-09-2024 a las 00:36:48
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 17-09-2024 a las 00:46:39
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -81,26 +81,37 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
     END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT, IN `v_codigo_cuenta` VARCHAR(50))   begin
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT)   begin
 	
 	DECLARE error_code INT DEFAULT 0;
     DECLARE cuenta_exist INT DEFAULT 0;
     -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_id_grupo INT;
+    DECLARE v_id_tipo INT;
+    DECLARE v_id_rubro INT;
+    DECLARE v_id_sub_rubro INT;
+    DECLARE v_id_forma_pago INT;
+    DECLARE v_id_cuenta INT;
     DECLARE v_debe DOUBLE;
     DECLARE v_haber DOUBLE;
    -- ID plan de cuenta
    	DECLARE v_saldo_actual DOUBLE;
    	DECLARE v_saldo_acumulado DOUBLE;
     DECLARE v_saldo_inicial DOUBLE;
+    declare v_codigo_cuenta VARCHAR(50);
    
 	-- Iniciar transacción
     START TRANSACTION;
-   		SELECT debe, haber INTO v_debe, v_haber
-	        FROM libro_diario
-	        WHERE id_libro_diario = v_id_libro_diario;
+   		SELECT rubro.id_grupo, rubro.id_tipo, libro_diario.id_rubro, libro_diario.id_sub_rubro, libro_diario.id_forma_pago, libro_diario.id_cuenta, libro_diario.debe, libro_diario.haber 
+		INTO v_id_grupo, v_id_tipo, v_id_rubro, v_id_sub_rubro, v_id_forma_pago, v_id_cuenta, v_debe, v_haber
+		FROM libro_diario
+		JOIN rubro ON libro_diario.id_rubro = rubro.id_rubro
+		WHERE libro_diario.id_libro_diario = v_id_libro_diario;
     -- Realizamos el DELETE
         DELETE FROM `libro_diario` WHERE id_libro_diario = v_id_libro_diario;
        
+    -- Concatenar los valores para formar el código de cuenta
+    	SET v_codigo_cuenta = CONCAT(v_id_grupo, '.', v_id_tipo, '.', v_id_rubro, '.', v_id_sub_rubro, '.', v_id_cuenta);
 	-- Sumamos o Restamos de la cuenta y si la caja queda en 0 la eliminamos.
         SELECT saldo_incial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
         FROM plan_cuenta
@@ -220,7 +231,7 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 	SELECT libro_diario.id_libro_diario, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
-			formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
+			formas_pago.forma_pago, cuentas.cuenta, libro_diario.fecha_registro, libro_diario.descripcion, libro_diario.debe, 
 			libro_diario.haber, libro_diario.gestion 
 			FROM `libro_diario`, `cuentas`, `formas_pago`, `grupos`, `rubros`,`sub_rubros`, `tipos` 
 			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro AND libro_diario.id_forma_pago = formas_pago.id_forma_pago AND libro_diario.id_cuenta = cuentas.id_cuenta) AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo);
