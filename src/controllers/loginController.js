@@ -18,9 +18,11 @@ module.exports = async (request, response) => {
                 const token = jwt.sign({usuario}, "Stack",{
                     expiresIn: '3m' //Tiempo en el que expira
                 })
-
+                const idUser = result.id_usuario;
                 console.log(result);
-                response.send({token: token});
+                response.send({token: token,
+                    id_usuario : idUser
+                });
             } else {
                 // Si no hay resultados, envíanos un mensaje adecuado
                 console.log('Wrong user');

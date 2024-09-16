@@ -2,17 +2,14 @@ const conexion = require('../models/conexion');
 
 module.exports = async (request, response) => {
     
-    const selectIdBookDiary = request.body;
-    // Concatenar los valores de id_grupo, id_tipo, id_rubro, id_sub_rubro, id_cuenta
-    const codigoCuenta = `${selectIdBookDiary.id_grupo}.${selectIdBookDiary.id_tipo}.${selectIdBookDiary.id_rubro}.${selectIdBookDiary.id_sub_rubro}.${selectIdBookDiary.id_cuenta}`;
     // Asignar el valor de codigo_cuentas al objeto JSON recibido
-    const idBookDiary = selectIdBookDiary.id_libro_diario;
+    const idBookDiary = parseInt(request.params.id, 10);
 
     console.log(registro);
     try {
         //let registroJson = JSON.stringify(registro);
 
-        conexion.query('CALL deleteBookDiary(?,?)', [ codigoCuenta, idBookDiary ], (error, result) => {
+        conexion.query('CALL deleteBookDiary(?)', [ idBookDiary ], (error, result) => {
             
             if (error) {
                 console.error('Error al ejecutar la consulta:', error); // Agregar un log para depuración
