@@ -12,7 +12,7 @@ module.exports = async (request, response) => {
     try {
         //let registroJson = JSON.stringify(registro);
 
-        conexion.query('CALL insertRegisterBookDiary(?,?)', [ codigoCuenta, idBookDiary ], (error, result) => {
+        conexion.query('CALL deleteBookDiary(?,?)', [ codigoCuenta, idBookDiary ], (error, result) => {
             
             if (error) {
                 console.error('Error al ejecutar la consulta:', error); // Agregar un log para depuración
