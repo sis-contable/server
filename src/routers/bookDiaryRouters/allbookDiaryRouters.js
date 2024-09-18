@@ -1,5 +1,5 @@
 //Importamos los controladores
-const creatRegisterBook = require('./createRegisterBookDiaryRouter');
+const creatRegisterBook = require('./createRegisterBookDiaryRouter.js');
 const listBookDiary = require('./getListBookDiaryRouter.js');
 const selectRegisterBookDiary = require('./selectRegisterBookDiaryRouter.js');
 const LookForBookDiary = require('./LookForBookDiaryRouter.js');
