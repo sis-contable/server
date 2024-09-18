@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-09-2024 a las 05:39:37
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 18-09-2024 a las 19:22:55
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -102,10 +102,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_di
    
 	-- Iniciar transacción
     START TRANSACTION;
-   		SELECT rubro.id_grupo, rubro.id_tipo, libro_diario.id_rubro, libro_diario.id_sub_rubro, libro_diario.id_forma_pago, libro_diario.id_cuenta, libro_diario.debe, libro_diario.haber 
+   		SELECT rubros.id_grupo, rubros.id_tipo, libro_diario.id_rubro, libro_diario.id_sub_rubro, libro_diario.id_forma_pago, libro_diario.id_cuenta, libro_diario.debe, libro_diario.haber 
 		INTO v_id_grupo, v_id_tipo, v_id_rubro, v_id_sub_rubro, v_id_forma_pago, v_id_cuenta, v_debe, v_haber
 		FROM libro_diario
-		JOIN rubro ON libro_diario.id_rubro = rubro.id_rubro
+		JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
 		WHERE libro_diario.id_libro_diario = v_id_libro_diario;
     -- Realizamos el DELETE
         DELETE FROM `libro_diario` WHERE id_libro_diario = v_id_libro_diario;
@@ -113,24 +113,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_di
     -- Concatenar los valores para formar el código de cuenta
     	SET v_codigo_cuenta = CONCAT(v_id_grupo, '.', v_id_tipo, '.', v_id_rubro, '.', v_id_sub_rubro, '.', v_id_cuenta);
 	-- Sumamos o Restamos de la cuenta y si la caja queda en 0 la eliminamos.
-        SELECT saldo_incial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
+        SELECT saldo_inicial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
         FROM plan_cuenta
         WHERE codigo_cuenta = v_codigo_cuenta;
+       -- Verificar que el SELECT encontró datos
+		IF v_saldo_inicial IS NULL THEN
+		    -- Manejar el caso cuando el registro no existe
+		    ROLLBACK;
+		    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se encontró la cuenta para el código especificado';
+		END IF;
 
         -- Actualizar los saldos según el debe y haber
     	IF v_debe != 0 then
-       		SET v_saldo_inicial = v_saldo_inicial - v_debe;
+       		SET v_saldo_inicial = v_saldo_inicial + v_debe;
         ELSE
-       		SET v_saldo_inicial = v_saldo_inicial + v_haber;
+       		SET v_saldo_inicial = v_saldo_inicial - v_haber;
         END IF;
        
 	    IF v_saldo_inicial != 0 then
 	    	IF v_debe != 0 then
-		        SET v_saldo_actual = v_saldo_actual - v_debe;
-	        	SET v_saldo_acumulado = v_saldo_acumulado - v_debe;
+		        SET v_saldo_actual = v_saldo_actual + v_debe;
+	        	SET v_saldo_acumulado = v_saldo_acumulado + v_debe;
 	        ELSE
-	        	SET v_saldo_actual = v_saldo_actual + v_haber;
-	        	SET v_saldo_acumulado = v_saldo_acumulado + v_haber;
+	        	SET v_saldo_actual = v_saldo_actual - v_haber;
+	        	SET v_saldo_acumulado = v_saldo_acumulado - v_haber;
 	        END IF;
 	       -- Actualizar la cuenta en plan_cuenta
 	        UPDATE plan_cuenta
@@ -356,8 +362,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
 	        WHERE codigo_cuenta = v_codigo_cuenta;
 	
 	        -- Actualizar los saldos según el debe y haber
-	        SET v_saldo_actual = v_saldo_actual + v_debe - v_haber;
-	        SET v_saldo_acumulado = v_saldo_acumulado + v_debe - v_haber;
+	        SET v_saldo_actual = v_saldo_actual - v_debe + v_haber;
+	        SET v_saldo_acumulado = v_saldo_acumulado - v_debe + v_haber;
 	
 	        -- Actualizar la cuenta en plan_cuenta
 	        UPDATE plan_cuenta
@@ -369,9 +375,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
 
 	       -- Actualizar los saldos según el debe y haber
 	    	IF v_debe != 0 then
-	        	SET v_saldo_actual = v_debe;
+	        	SET v_saldo_actual = -v_debe;
 	        ELSE
-	        	SET v_saldo_actual = -v_haber;
+	        	SET v_saldo_actual = v_haber;
 	        END IF;
 	
 	        -- Realizar el insert
@@ -501,9 +507,7 @@ CREATE TABLE `libro_diario` (
 --
 
 INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(1, 1, 10, 1, 1, 1, '2024-08-31', 'pago a', 250000.00, NULL, 1),
-(8, 1, 1, 1, 1, 1, '2024-09-07', 'Pago proveedor', 0.00, 1500.00, 1),
-(9, 1, 1, 1, 1, 1, '2024-09-07', 'Pago proveedor', 1500.00, 0.00, 1);
+(14, 1, 8, 24, 3, 2, '2024-09-15', 'Inversion', 1500.00, 0.00, 1);
 
 -- --------------------------------------------------------
 
@@ -527,7 +531,7 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
-('1.1.1.1.1', 1, 1, -1500, 0, 0, '2024-09-07', 1);
+('1.2.8.24.2', 24, 2, -1500, -1500, -1500, '2024-09-18', 1);
 
 -- --------------------------------------------------------
 
@@ -846,7 +850,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`

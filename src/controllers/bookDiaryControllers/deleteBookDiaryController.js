@@ -8,14 +8,13 @@ module.exports = async (request, response) => {
     console.log(idBookDiary);
     try {
         //let registroJson = JSON.stringify(registro);
-
         conexion.query('CALL deleteBookDiary(?)', [ idBookDiary ], (error, result) => {
             
             if (error) {
                 console.error('Error al ejecutar la consulta:', error); // Agregar un log para depuración
-                response.status(500).send({ message: 'Error al cargar el registro', error: error.message });
+                response.status(500).send({ message: 'Error al eliminar el registro', error: error.message });
             } else {
-                response.status(200).send({ message: 'Registro cargado con existo' });
+                response.status(200).send({ message: 'Registro eliminado con exito' });
             }
         });
     } catch (e) {
