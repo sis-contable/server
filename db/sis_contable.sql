@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-09-2024 a las 00:46:39
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Tiempo de generación: 18-09-2024 a las 05:39:37
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -565,24 +565,24 @@ INSERT INTO `rubros` (`id_rubro`, `id_grupo`, `id_tipo`, `rubro`) VALUES
 (16, 2, 2, 'Préstamos a Largo Plazo'),
 (17, 2, 2, 'Obligaciones Financieras a Largo Plazo'),
 (18, 2, 2, 'Provisiones a Largo Plazo'),
-(26, 3, NULL, 'Aportes de los Propietarios'),
-(27, 3, NULL, 'Capital Social'),
-(28, 3, NULL, 'Primas de Emisión'),
-(29, 3, NULL, 'Resultados No Asignados'),
-(30, 3, NULL, 'Reservas'),
-(31, 3, NULL, 'Resultados Acumulados'),
-(32, 3, NULL, 'Resultado del Ejercicio'),
-(33, 4, NULL, 'Ventas'),
-(34, 4, NULL, 'Ingresos por Prestación de Servicios'),
-(35, 4, NULL, 'Ingresos Financieros'),
-(36, 4, NULL, 'Otros Ingresos Operacionales'),
-(37, 4, NULL, 'Ingresos No Operacionales'),
-(38, 5, NULL, 'Costos de Ventas'),
-(39, 5, NULL, 'Gastos de Administración'),
-(40, 5, NULL, 'Gastos de Comercialización'),
-(41, 5, NULL, 'Gastos Financieros'),
-(42, 5, NULL, 'Otros Gastos Operacionales'),
-(43, 5, NULL, 'Gastos No Operacionales');
+(26, 3, 3, 'Aportes de los Propietarios'),
+(27, 3, 3, 'Capital Social'),
+(28, 3, 3, 'Primas de Emisión'),
+(29, 3, 3, 'Resultados No Asignados'),
+(30, 3, 3, 'Reservas'),
+(31, 3, 3, 'Resultados Acumulados'),
+(32, 3, 3, 'Resultado del Ejercicio'),
+(33, 4, 3, 'Ventas'),
+(34, 4, 3, 'Ingresos por Prestación de Servicios'),
+(35, 4, 3, 'Ingresos Financieros'),
+(36, 4, 3, 'Otros Ingresos Operacionales'),
+(37, 4, 3, 'Ingresos No Operacionales'),
+(38, 5, 3, 'Costos de Ventas'),
+(39, 5, 3, 'Gastos de Administración'),
+(40, 5, 3, 'Gastos de Comercialización'),
+(41, 5, 3, 'Gastos Financieros'),
+(42, 5, 3, 'Otros Gastos Operacionales'),
+(43, 5, 3, 'Gastos No Operacionales');
 
 -- --------------------------------------------------------
 
