@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-09-2024 a las 19:22:55
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 22-09-2024 a las 22:48:36
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -396,24 +396,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
     	END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `json_text` TEXT)   begin
-    DECLARE exit_handler BOOLEAN DEFAULT FALSE;
-    DECLARE json_error VARCHAR(512) DEFAULT '';
+CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `dataJson` JSON)   BEGIN
+	 DECLARE user_not_found BOOLEAN DEFAULT FALSE;
+    
+    -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_id_usuario INT;
+    DECLARE v_usuario VARCHAR(255);
+    DECLARE v_password VARCHAR(255);
 
-    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET exit_handler = TRUE;
-        GET DIAGNOSTICS CONDITION 1 json_error = MESSAGE_TEXT;
-    END;
+    -- Extraer valores del JSON
+    SET v_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.usuario'));
+    SET v_password = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.clave'));
+    
+	SELECT id_usuario into v_id_usuario FROM Usuarios 
+    WHERE usuario = v_usuario AND password = v_password;
+		
+	-- Verificar si no se encontró ningún usuario
+    IF v_id_usuario IS NULL THEN
+        SET user_not_found = TRUE;
+    END IF;
 
-    -- SELECT USUARIO EXISTE 
-    SELECT * FROM Usuarios 
-    WHERE usuario = JSON_UNQUOTE(JSON_EXTRACT(json_text, '$.usuario'))
-    AND password = JSON_UNQUOTE(JSON_EXTRACT(json_text, '$.clave'));
-
-    IF exit_handler THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = json_error;
+    -- Si el usuario no fue encontrado, devolver un mensaje de error
+    IF user_not_found THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuario o contraseña incorrectos';
+    ELSE
+        -- Si todo está bien, devolver el id_usuario
+        SELECT v_id_usuario AS id_usuario;
     END IF;
 END$$
 
@@ -507,7 +515,8 @@ CREATE TABLE `libro_diario` (
 --
 
 INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(14, 1, 8, 24, 3, 2, '2024-09-15', 'Inversion', 1500.00, 0.00, 1);
+(14, 1, 8, 24, 3, 2, '2024-09-15', 'Inversion', 1500.00, 0.00, 1),
+(15, 1, 1, 1, 3, 1, '2024-09-22', 'Pago por deuda', 500.00, 0.00, 0);
 
 -- --------------------------------------------------------
 
@@ -531,6 +540,7 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
+('1.1.1.1.1', 1, 1, -500, -500, -500, '2024-09-22', 1),
 ('1.2.8.24.2', 24, 2, -1500, -1500, -1500, '2024-09-18', 1);
 
 -- --------------------------------------------------------
@@ -850,7 +860,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`

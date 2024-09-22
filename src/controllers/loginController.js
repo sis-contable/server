@@ -7,31 +7,33 @@ module.exports = async (request, response) => {
     //const consult = 'SELECT * FROM usuarios WHERE usuario = ? and password = ?';
 
     try{
-        let userJson = JSON.stringify(usuario, clave);
+        let userJson = JSON.stringify({ usuario, clave });
         conexion.query('CALL login(?)', [userJson], (error, result)=>{
             if(error){
                 //Si hay un error envianoslo
                 response.send(error);
             }
 
-            if(result.length > 0){
-                const token = jwt.sign({usuario}, "Stack",{
-                    expiresIn: '3m' //Tiempo en el que expira
-                })
-                const idUser = result.id_usuario;
+            // Verificar que result esté definido y que tenga resultados
+            if (result && result.length > 0 && result[0].length > 0) {
+                const token = jwt.sign({ usuario }, "Stack", {
+                    expiresIn: '3m'  // Tiempo en el que expira
+                });
+                const idUser = result[0][0].id_usuario;  // Acceder a la primera fila del resultado
                 console.log(result);
-                response.send({token: token,
-                    id_usuario : idUser
+                response.send({
+                    token: token,
+                    id_usuario: idUser
                 });
             } else {
-                // Si no hay resultados, envíanos un mensaje adecuado
+                // Si no hay resultados o el usuario no existe
                 console.log('Wrong user');
-                response.send({mensage: 'Wrong user'});
+                response.status(401).send({ message: 'Usuario o contraseña incorrectos' });
             }
-        })
-    } catch(e){
-        // Capturar cualquier otro error
-        response.send(e);
-
+        });
+    } catch (err) {
+        console.error('Error en el servidor:', err);
+        response.status(500).send({ error: 'Error en el servidor' });
     }
+  
 };
