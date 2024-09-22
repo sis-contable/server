@@ -4,6 +4,6 @@ const { Router } = require('express');
 const selectIdBookDiary = require('../../controllers/bookDiaryControllers/deleteBookDiaryController.js');
 
 const app = Router();
-app.delete('/deleteRegister/:id', selectIdBookDiary);
+app.delete('/deleteBookDiary/:id', selectIdBookDiary);
 
 module.exports = app;

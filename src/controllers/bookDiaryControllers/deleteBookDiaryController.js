@@ -4,8 +4,6 @@ module.exports = async (request, response) => {
     
     // Asignar el valor de codigo_cuentas al objeto JSON recibido
     const idBookDiary = parseInt(request.params.id, 10);
-
-    console.log(idBookDiary);
     try {
         //let registroJson = JSON.stringify(registro);
         conexion.query('CALL deleteBookDiary(?)', [ idBookDiary ], (error, result) => {
