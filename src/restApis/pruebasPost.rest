@@ -1,0 +1,18 @@
+POST  http://localhost:3000/createRegisterBookDiary
+Content-Type: application/json
+
+{
+    "id_usuario": 1,
+    "id_grupo": 1,
+    "id_tipo": 2,
+    "id_rubro": 8,
+    "id_sub_rubro": 24,
+    "id_forma_pago": 3,
+    "id_cuenta": 2,
+    "fecha_registro": "2024-09-15",
+    "descripcion": "Inversion",
+    "debe": 1500,
+    "haber": 0,
+    "gestion": 1,
+    "codigo_cuenta": ""
+}
