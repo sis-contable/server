@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-09-2024 a las 22:48:36
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 23-09-2024 a las 15:13:04
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -259,7 +259,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `dataJ
     SET v_fecha_desde = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_desde'));
     SET v_fecha_hasta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_hasta'));
    
-   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN fache_desde AND fache_hasta;
+   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN v_fecha_desde AND v_fecha_hasta;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryWord` (IN `LookFor` VARCHAR(50))   BEGIN
@@ -926,13 +926,3 @@ ALTER TABLE `rubros`
 ALTER TABLE `sub_rubros`
   ADD CONSTRAINT `id_rubos_sub_rubros_fk` FOREIGN KEY (`id_rubro`) REFERENCES `rubros` (`id_rubro`);
 
---
--- Filtros para la tabla `usuarios`
---
-ALTER TABLE `usuarios`
-  ADD CONSTRAINT `fk_usuario_tipos` FOREIGN KEY (`id_tipo_usuario`) REFERENCES `tipos_usuario` (`id_tipo_usuario`);
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

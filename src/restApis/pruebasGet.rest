@@ -1,2 +1,9 @@
-GET http://localhost:3000/getRubro/2/2
+POST http://localhost:3000/LookForBookDiaryDate/
+
+Content-Type: application/json
+
+{
+    "fecha_desde": "2024-09-20",
+    "fecha_hasta": "2024-09-23"
+}
 

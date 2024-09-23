@@ -4,6 +4,7 @@ const conexion = require('../../models/conexion');
 module.exports.getLookForBookDiaryWord = async (request, response) => {
     const LookForWord = request.body;
 
+    console.log(LookForWord);
     try {
         conexion.query('CALL getLookForBookDiaryWord(?)', [LookForWord], (error, result) => {
             
@@ -26,6 +27,7 @@ module.exports.getLookForBookDiaryWord = async (request, response) => {
 module.exports.getLookForBookDiaryDate = async (request, response) => {
     const LookForDate = request.body;
 
+    console.log(LookForDate);
     try {
         conexion.query('CALL getLookForBookDiaryDate(?)', [JSON.stringify(LookForDate)], (error, result) => {
             
