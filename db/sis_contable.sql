@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-09-2024 a las 22:48:36
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 24-09-2024 a las 00:51:14
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -251,15 +251,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `dataJson` JSON)   begin
-	DECLARE v_fecha_desde DATE;
-    DECLARE v_fecha_hasta DATE;
-
-    -- Extraer valores del JSON
-    SET v_fecha_desde = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_desde'));
-    SET v_fecha_hasta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fache_hasta'));
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde` DATE, IN `hasta` DATE)   begin
    
-   SELECT * FROM `libro_diario` WHERE fecha_registro BETWEEN fache_desde AND fache_hasta;
+   select libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
+		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
+		   libro_diario.haber, libro_diario.gestion 
+	FROM libro_diario
+	JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+	JOIN formas_pago ON libro_diario.id_forma_pago = formas_pago.id_forma_pago
+	JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
+	JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+	JOIN grupos ON rubros.id_grupo = grupos.id_grupo
+	JOIN tipos ON rubros.id_tipo = tipos.id_tipo
+	WHERE libro_diario.fecha_registro BETWEEN desde AND hasta;
+  
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryWord` (IN `LookFor` VARCHAR(50))   BEGIN

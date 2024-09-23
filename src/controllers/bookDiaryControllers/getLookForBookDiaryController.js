@@ -2,10 +2,11 @@ const conexion = require('../../models/conexion');
 
 //Buscador por palabra
 module.exports.getLookForBookDiaryWord = async (request, response) => {
-    const LookForWord = request.body;
+    const { word } = request.params;
+    console.log(word);
 
     try {
-        conexion.query('CALL getLookForBookDiaryWord(?)', [LookForWord], (error, result) => {
+        conexion.query('CALL getLookForBookDiaryWord(?)', [word], (error, result) => {
             
             if (error) {
                 
@@ -24,10 +25,11 @@ module.exports.getLookForBookDiaryWord = async (request, response) => {
 
 //Buscador por fecha
 module.exports.getLookForBookDiaryDate = async (request, response) => {
-    const LookForDate = request.body;
+    const { desde } = request.params;
+    const { hasta } = request.params;
 
     try {
-        conexion.query('CALL getLookForBookDiaryDate(?)', [JSON.stringify(LookForDate)], (error, result) => {
+        conexion.query('CALL getLookForBookDiaryDate(?,?)', [desde,hasta], (error, result) => {
             
             if (error) {
                 
