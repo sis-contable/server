@@ -1,7 +1,7 @@
-const conexion = require('../models/conexion');
+const conexion = require('../../models/conexion');
 
 //Buscador por palabra
-module.exports.getShareBookDiaryWord = async (request, response) => {
+module.exports.getLookForBookDiaryWord = async (request, response) => {
     const LookForWord = request.body;
 
     try {

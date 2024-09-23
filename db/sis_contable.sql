@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-09-2024 a las 00:36:48
+-- Tiempo de generación: 22-09-2024 a las 22:48:36
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.0.28
 
@@ -81,45 +81,62 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
     END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT, IN `v_codigo_cuenta` VARCHAR(50))   begin
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT)   begin
 	
 	DECLARE error_code INT DEFAULT 0;
     DECLARE cuenta_exist INT DEFAULT 0;
     -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_id_grupo INT;
+    DECLARE v_id_tipo INT;
+    DECLARE v_id_rubro INT;
+    DECLARE v_id_sub_rubro INT;
+    DECLARE v_id_forma_pago INT;
+    DECLARE v_id_cuenta INT;
     DECLARE v_debe DOUBLE;
     DECLARE v_haber DOUBLE;
    -- ID plan de cuenta
    	DECLARE v_saldo_actual DOUBLE;
    	DECLARE v_saldo_acumulado DOUBLE;
     DECLARE v_saldo_inicial DOUBLE;
+    declare v_codigo_cuenta VARCHAR(50);
    
 	-- Iniciar transacción
     START TRANSACTION;
-   		SELECT debe, haber INTO v_debe, v_haber
-	        FROM libro_diario
-	        WHERE id_libro_diario = v_id_libro_diario;
+   		SELECT rubros.id_grupo, rubros.id_tipo, libro_diario.id_rubro, libro_diario.id_sub_rubro, libro_diario.id_forma_pago, libro_diario.id_cuenta, libro_diario.debe, libro_diario.haber 
+		INTO v_id_grupo, v_id_tipo, v_id_rubro, v_id_sub_rubro, v_id_forma_pago, v_id_cuenta, v_debe, v_haber
+		FROM libro_diario
+		JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
+		WHERE libro_diario.id_libro_diario = v_id_libro_diario;
     -- Realizamos el DELETE
         DELETE FROM `libro_diario` WHERE id_libro_diario = v_id_libro_diario;
        
+    -- Concatenar los valores para formar el código de cuenta
+    	SET v_codigo_cuenta = CONCAT(v_id_grupo, '.', v_id_tipo, '.', v_id_rubro, '.', v_id_sub_rubro, '.', v_id_cuenta);
 	-- Sumamos o Restamos de la cuenta y si la caja queda en 0 la eliminamos.
-        SELECT saldo_incial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
+        SELECT saldo_inicial, saldo_actual, saldo_acumulado INTO v_saldo_inicial, v_saldo_actual, v_saldo_acumulado
         FROM plan_cuenta
         WHERE codigo_cuenta = v_codigo_cuenta;
+       -- Verificar que el SELECT encontró datos
+		IF v_saldo_inicial IS NULL THEN
+		    -- Manejar el caso cuando el registro no existe
+		    ROLLBACK;
+		    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se encontró la cuenta para el código especificado';
+		END IF;
 
         -- Actualizar los saldos según el debe y haber
     	IF v_debe != 0 then
-       		SET v_saldo_inicial = v_saldo_inicial - v_debe;
+       		SET v_saldo_inicial = v_saldo_inicial + v_debe;
         ELSE
-       		SET v_saldo_inicial = v_saldo_inicial + v_haber;
+       		SET v_saldo_inicial = v_saldo_inicial - v_haber;
         END IF;
        
 	    IF v_saldo_inicial != 0 then
 	    	IF v_debe != 0 then
-		        SET v_saldo_actual = v_saldo_actual - v_debe;
-	        	SET v_saldo_acumulado = v_saldo_acumulado - v_debe;
+		        SET v_saldo_actual = v_saldo_actual + v_debe;
+	        	SET v_saldo_acumulado = v_saldo_acumulado + v_debe;
 	        ELSE
-	        	SET v_saldo_actual = v_saldo_actual + v_haber;
-	        	SET v_saldo_acumulado = v_saldo_acumulado + v_haber;
+	        	SET v_saldo_actual = v_saldo_actual - v_haber;
+	        	SET v_saldo_acumulado = v_saldo_acumulado - v_haber;
 	        END IF;
 	       -- Actualizar la cuenta en plan_cuenta
 	        UPDATE plan_cuenta
@@ -220,7 +237,7 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 	SELECT libro_diario.id_libro_diario, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
-			formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
+			formas_pago.forma_pago, cuentas.cuenta, libro_diario.fecha_registro, libro_diario.descripcion, libro_diario.debe, 
 			libro_diario.haber, libro_diario.gestion 
 			FROM `libro_diario`, `cuentas`, `formas_pago`, `grupos`, `rubros`,`sub_rubros`, `tipos` 
 			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro AND libro_diario.id_forma_pago = formas_pago.id_forma_pago AND libro_diario.id_cuenta = cuentas.id_cuenta) AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo);
@@ -345,8 +362,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
 	        WHERE codigo_cuenta = v_codigo_cuenta;
 	
 	        -- Actualizar los saldos según el debe y haber
-	        SET v_saldo_actual = v_saldo_actual + v_debe - v_haber;
-	        SET v_saldo_acumulado = v_saldo_acumulado + v_debe - v_haber;
+	        SET v_saldo_actual = v_saldo_actual - v_debe + v_haber;
+	        SET v_saldo_acumulado = v_saldo_acumulado - v_debe + v_haber;
 	
 	        -- Actualizar la cuenta en plan_cuenta
 	        UPDATE plan_cuenta
@@ -358,9 +375,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
 
 	       -- Actualizar los saldos según el debe y haber
 	    	IF v_debe != 0 then
-	        	SET v_saldo_actual = v_debe;
+	        	SET v_saldo_actual = -v_debe;
 	        ELSE
-	        	SET v_saldo_actual = -v_haber;
+	        	SET v_saldo_actual = v_haber;
 	        END IF;
 	
 	        -- Realizar el insert
@@ -379,24 +396,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
     	END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `json_text` TEXT)   begin
-    DECLARE exit_handler BOOLEAN DEFAULT FALSE;
-    DECLARE json_error VARCHAR(512) DEFAULT '';
+CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `dataJson` JSON)   BEGIN
+	 DECLARE user_not_found BOOLEAN DEFAULT FALSE;
+    
+    -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_id_usuario INT;
+    DECLARE v_usuario VARCHAR(255);
+    DECLARE v_password VARCHAR(255);
 
-    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET exit_handler = TRUE;
-        GET DIAGNOSTICS CONDITION 1 json_error = MESSAGE_TEXT;
-    END;
+    -- Extraer valores del JSON
+    SET v_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.usuario'));
+    SET v_password = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.clave'));
+    
+	SELECT id_usuario into v_id_usuario FROM Usuarios 
+    WHERE usuario = v_usuario AND password = v_password;
+		
+	-- Verificar si no se encontró ningún usuario
+    IF v_id_usuario IS NULL THEN
+        SET user_not_found = TRUE;
+    END IF;
 
-    -- SELECT USUARIO EXISTE 
-    SELECT * FROM Usuarios 
-    WHERE usuario = JSON_UNQUOTE(JSON_EXTRACT(json_text, '$.usuario'))
-    AND password = JSON_UNQUOTE(JSON_EXTRACT(json_text, '$.clave'));
-
-    IF exit_handler THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = json_error;
+    -- Si el usuario no fue encontrado, devolver un mensaje de error
+    IF user_not_found THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuario o contraseña incorrectos';
+    ELSE
+        -- Si todo está bien, devolver el id_usuario
+        SELECT v_id_usuario AS id_usuario;
     END IF;
 END$$
 
@@ -490,9 +515,8 @@ CREATE TABLE `libro_diario` (
 --
 
 INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(1, 1, 10, 1, 1, 1, '2024-08-31', 'pago a', 250000.00, NULL, 1),
-(8, 1, 1, 1, 1, 1, '2024-09-07', 'Pago proveedor', 0.00, 1500.00, 1),
-(9, 1, 1, 1, 1, 1, '2024-09-07', 'Pago proveedor', 1500.00, 0.00, 1);
+(14, 1, 8, 24, 3, 2, '2024-09-15', 'Inversion', 1500.00, 0.00, 1),
+(15, 1, 1, 1, 3, 1, '2024-09-22', 'Pago por deuda', 500.00, 0.00, 0);
 
 -- --------------------------------------------------------
 
@@ -516,7 +540,8 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
-('1.1.1.1.1', 1, 1, -1500, 0, 0, '2024-09-07', 1);
+('1.1.1.1.1', 1, 1, -500, -500, -500, '2024-09-22', 1),
+('1.2.8.24.2', 24, 2, -1500, -1500, -1500, '2024-09-18', 1);
 
 -- --------------------------------------------------------
 
@@ -554,24 +579,24 @@ INSERT INTO `rubros` (`id_rubro`, `id_grupo`, `id_tipo`, `rubro`) VALUES
 (16, 2, 2, 'Préstamos a Largo Plazo'),
 (17, 2, 2, 'Obligaciones Financieras a Largo Plazo'),
 (18, 2, 2, 'Provisiones a Largo Plazo'),
-(26, 3, NULL, 'Aportes de los Propietarios'),
-(27, 3, NULL, 'Capital Social'),
-(28, 3, NULL, 'Primas de Emisión'),
-(29, 3, NULL, 'Resultados No Asignados'),
-(30, 3, NULL, 'Reservas'),
-(31, 3, NULL, 'Resultados Acumulados'),
-(32, 3, NULL, 'Resultado del Ejercicio'),
-(33, 4, NULL, 'Ventas'),
-(34, 4, NULL, 'Ingresos por Prestación de Servicios'),
-(35, 4, NULL, 'Ingresos Financieros'),
-(36, 4, NULL, 'Otros Ingresos Operacionales'),
-(37, 4, NULL, 'Ingresos No Operacionales'),
-(38, 5, NULL, 'Costos de Ventas'),
-(39, 5, NULL, 'Gastos de Administración'),
-(40, 5, NULL, 'Gastos de Comercialización'),
-(41, 5, NULL, 'Gastos Financieros'),
-(42, 5, NULL, 'Otros Gastos Operacionales'),
-(43, 5, NULL, 'Gastos No Operacionales');
+(26, 3, 3, 'Aportes de los Propietarios'),
+(27, 3, 3, 'Capital Social'),
+(28, 3, 3, 'Primas de Emisión'),
+(29, 3, 3, 'Resultados No Asignados'),
+(30, 3, 3, 'Reservas'),
+(31, 3, 3, 'Resultados Acumulados'),
+(32, 3, 3, 'Resultado del Ejercicio'),
+(33, 4, 3, 'Ventas'),
+(34, 4, 3, 'Ingresos por Prestación de Servicios'),
+(35, 4, 3, 'Ingresos Financieros'),
+(36, 4, 3, 'Otros Ingresos Operacionales'),
+(37, 4, 3, 'Ingresos No Operacionales'),
+(38, 5, 3, 'Costos de Ventas'),
+(39, 5, 3, 'Gastos de Administración'),
+(40, 5, 3, 'Gastos de Comercialización'),
+(41, 5, 3, 'Gastos Financieros'),
+(42, 5, 3, 'Otros Gastos Operacionales'),
+(43, 5, 3, 'Gastos No Operacionales');
 
 -- --------------------------------------------------------
 
@@ -835,7 +860,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`

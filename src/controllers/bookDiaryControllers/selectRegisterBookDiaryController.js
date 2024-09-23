@@ -1,5 +1,4 @@
-const conexion = require('../models/conexion');
-
+const conexion = require('../../models/conexion');
 //GRUPO
 module.exports.getGroup = async (request, response) => {
     //Trae  id_grupo y grupo
@@ -35,8 +34,10 @@ module.exports.getType = async (request, response) => {
 //RUBRO
 module.exports.getRubro = async (request, response) => {
     // Obtener el ID de grupo y tipo de los parámetros de la solicitud
-    const groupId = request.params.id_grupo;
-    const typeId = request.params.id_tipo;
+    const groupId = parseInt(request.params.idg, 10);
+    const typeId = parseInt(request.params.idt, 10);
+
+    ;
     //Trae id_rubro y rubro, segun id_grupo y id_tipo
     try {
         conexion.query('CALL getRubro(?, ?)', [groupId,typeId], (error, result) => {

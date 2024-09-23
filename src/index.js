@@ -25,11 +25,12 @@ app.use('/',allControllersUsers.deleteUser);
 app.use('/',allControllersUsers.createUser);
 
 //traemos el archivo donde se encuentran las rutas del registro
-const allControllersBook = require('./routers/allbookDiaryRouters');
+const allControllersBook = require('./routers/bookDiaryRouters/allbookDiaryRouters');
 app.use('/', allControllersBook.creatRegisterBook);
 app.use('/', allControllersBook.listBookDiary);
 app.use('/', allControllersBook.selectRegisterBookDiary);
-
+app.use('/', allControllersBook.deleteBookDiary);
+app.use('/', allControllersBook.LookForBookDiary);
 
 app.listen(port, ()=>{
     console.log('El puerto que esta escuchando es:' + port);
