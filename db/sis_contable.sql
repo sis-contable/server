@@ -253,7 +253,7 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde` DATE, IN `hasta` DATE)   begin
    
-   select libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
+   select libro_diario.id_libro_diario, libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
 		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
 		   libro_diario.haber, libro_diario.gestion 
 	FROM libro_diario
@@ -268,7 +268,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryWord` (IN `LookFor` VARCHAR(50))   BEGIN
-	SELECT libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
+	SELECT libro_diario.id_libro_diario, libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
 		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
 		   libro_diario.haber, libro_diario.gestion 
 	FROM libro_diario
