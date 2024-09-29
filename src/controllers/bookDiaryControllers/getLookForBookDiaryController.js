@@ -13,7 +13,7 @@ module.exports.getLookForBookDiaryWord = async (request, response) => {
                 response.status(400).send({ message: 'No se encontro resultado para su busqueda', error: error.message });
                 
             } else {
-                response.status(200);
+                response.status(200).send(result);
             }
         });
     } catch (e) {

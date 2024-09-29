@@ -17,7 +17,7 @@ module.exports = async (request, response) => {
             // Verificar que result esté definido y que tenga resultados
             if (result && result.length > 0 && result[0].length > 0) {
                 const token = jwt.sign({ usuario }, "Stack", {
-                    expiresIn: '3m'  // Tiempo en el que expira
+                    expiresIn: '30m'  // Tiempo en el que expira
                 });
                 const idUser = result[0][0].id_usuario;  // Acceder a la primera fila del resultado
                 console.log(result);
