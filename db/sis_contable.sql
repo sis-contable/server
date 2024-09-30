@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-09-2024 a las 15:13:04
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 30-09-2024 a las 02:40:44
+-- Versión del servidor: 8.0.32
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -235,6 +235,25 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getGroupDiary` ()   begin
 	SELECT * FROM `grupos` WHERE 1;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getListAccountsPlan` ()   BEGIN
+	select plan_cuenta.codigo_cuenta , sub_rubros.sub_rubro , cuentas.cuenta , 
+	plan_cuenta.saldo_inicial , plan_cuenta.saldo_actual , plan_cuenta.saldo_acumulado , 
+	plan_cuenta.fecha_creacion from plan_cuenta 
+	join sub_rubros on plan_cuenta.id_sub_rubro = sub_rubros.id_sub_rubro
+	join cuentas on plan_cuenta.id_cuenta = cuentas.id_cuenta;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getListAccountsPlanByKeyword` (IN `Keyword` VARCHAR(50))   BEGIN
+	SELECT plan_cuenta.codigo_cuenta, sub_rubros.sub_rubro, cuentas.cuenta, 
+			plan_cuenta.saldo_inicial, plan_cuenta.saldo_actual, plan_cuenta.saldo_acumulado, 
+			plan_cuenta.fecha_creacion
+	FROM plan_cuenta
+	JOIN sub_rubros ON plan_cuenta.id_sub_rubro = sub_rubros.id_sub_rubro
+	JOIN cuentas ON plan_cuenta.id_cuenta = cuentas.id_cuenta
+	WHERE sub_rubros.sub_rubro LIKE CONCAT('%', Keyword, '%')
+	OR cuentas.cuenta LIKE CONCAT('%', Keyword, '%');
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 	SELECT libro_diario.id_libro_diario, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
 			formas_pago.forma_pago, cuentas.cuenta, libro_diario.fecha_registro, libro_diario.descripcion, libro_diario.debe, 
@@ -251,7 +270,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde` DATE, IN `hasta` DATE)   begin
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde` VARCHAR(10), IN `hasta` VARCHAR(10))   begin
+
+	declare fecha_desde date;
+    declare fecha_hasta date; 
+    
+    set fecha_desde = STR_TO_DATE(desde, '%Y-%m-%d');
+    set fecha_hasta = STR_TO_DATE(hasta, '%Y-%m-%d');
    
    select libro_diario.id_libro_diario, libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
 		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
@@ -263,7 +288,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde
 	JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
 	JOIN grupos ON rubros.id_grupo = grupos.id_grupo
 	JOIN tipos ON rubros.id_tipo = tipos.id_tipo
-	WHERE libro_diario.fecha_registro BETWEEN desde AND hasta;
+	WHERE libro_diario.fecha_registro BETWEEN fecha_desde AND fecha_hasta;
   
 END$$
 
@@ -439,8 +464,8 @@ DELIMITER ;
 --
 
 CREATE TABLE `cuentas` (
-  `id_cuenta` int(11) NOT NULL,
-  `cuenta` varchar(150) NOT NULL
+  `id_cuenta` int NOT NULL,
+  `cuenta` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -459,8 +484,8 @@ INSERT INTO `cuentas` (`id_cuenta`, `cuenta`) VALUES
 --
 
 CREATE TABLE `formas_pago` (
-  `id_forma_pago` int(11) NOT NULL,
-  `forma_pago` varchar(150) DEFAULT NULL
+  `id_forma_pago` int NOT NULL,
+  `forma_pago` varchar(150) COLLATE utf8mb4_spanish_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -480,8 +505,8 @@ INSERT INTO `formas_pago` (`id_forma_pago`, `forma_pago`) VALUES
 --
 
 CREATE TABLE `grupos` (
-  `id_grupo` int(11) NOT NULL,
-  `grupo` varchar(150) NOT NULL
+  `id_grupo` int NOT NULL,
+  `grupo` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -502,17 +527,17 @@ INSERT INTO `grupos` (`id_grupo`, `grupo`) VALUES
 --
 
 CREATE TABLE `libro_diario` (
-  `id_libro_diario` int(11) NOT NULL,
-  `id_usuario` int(11) NOT NULL,
-  `id_rubro` int(11) NOT NULL,
-  `id_sub_rubro` int(11) NOT NULL,
-  `id_forma_pago` int(11) NOT NULL,
-  `id_cuenta` int(11) NOT NULL,
+  `id_libro_diario` int NOT NULL,
+  `id_usuario` int NOT NULL,
+  `id_rubro` int NOT NULL,
+  `id_sub_rubro` int NOT NULL,
+  `id_forma_pago` int NOT NULL,
+  `id_cuenta` int NOT NULL,
   `fecha_registro` date NOT NULL,
-  `descripcion` varchar(300) NOT NULL,
+  `descripcion` varchar(300) COLLATE utf8mb4_spanish_ci NOT NULL,
   `debe` decimal(10,2) DEFAULT NULL,
   `haber` decimal(10,2) DEFAULT NULL,
-  `gestion` int(1) NOT NULL
+  `gestion` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -530,15 +555,15 @@ INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub
 --
 
 CREATE TABLE `plan_cuenta` (
-  `codigo_cuenta` varchar(50) NOT NULL,
-  `id_sub_rubro` int(11) NOT NULL,
-  `id_cuenta` int(11) NOT NULL,
+  `codigo_cuenta` varchar(50) COLLATE utf8mb3_spanish_ci NOT NULL,
+  `id_sub_rubro` int NOT NULL,
+  `id_cuenta` int NOT NULL,
   `saldo_inicial` double NOT NULL,
   `saldo_actual` double NOT NULL,
   `saldo_acumulado` double NOT NULL,
   `fecha_creacion` date NOT NULL,
-  `estado` int(1) NOT NULL COMMENT '0 - Desactivado / 1 - Activado'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+  `estado` int NOT NULL COMMENT '0 - Desactivado / 1 - Activado'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `plan_cuenta`
@@ -555,10 +580,10 @@ INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_
 --
 
 CREATE TABLE `rubros` (
-  `id_rubro` int(11) NOT NULL,
-  `id_grupo` int(11) DEFAULT NULL,
-  `id_tipo` int(11) DEFAULT NULL,
-  `rubro` varchar(150) NOT NULL
+  `id_rubro` int NOT NULL,
+  `id_grupo` int DEFAULT NULL,
+  `id_tipo` int DEFAULT NULL,
+  `rubro` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -610,9 +635,9 @@ INSERT INTO `rubros` (`id_rubro`, `id_grupo`, `id_tipo`, `rubro`) VALUES
 --
 
 CREATE TABLE `sub_rubros` (
-  `id_sub_rubro` int(11) NOT NULL,
-  `id_rubro` int(11) NOT NULL,
-  `sub_rubro` varchar(150) NOT NULL
+  `id_sub_rubro` int NOT NULL,
+  `id_rubro` int NOT NULL,
+  `sub_rubro` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -708,8 +733,8 @@ INSERT INTO `sub_rubros` (`id_sub_rubro`, `id_rubro`, `sub_rubro`) VALUES
 --
 
 CREATE TABLE `tipos` (
-  `id_tipo` int(11) NOT NULL,
-  `tipo` varchar(12) NOT NULL
+  `id_tipo` int NOT NULL,
+  `tipo` varchar(12) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -728,8 +753,8 @@ INSERT INTO `tipos` (`id_tipo`, `tipo`) VALUES
 --
 
 CREATE TABLE `tipos_usuario` (
-  `id_tipo_usuario` int(11) NOT NULL,
-  `tipo_usuario` varchar(150) NOT NULL
+  `id_tipo_usuario` int NOT NULL,
+  `tipo_usuario` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -747,12 +772,12 @@ INSERT INTO `tipos_usuario` (`id_tipo_usuario`, `tipo_usuario`) VALUES
 --
 
 CREATE TABLE `usuarios` (
-  `id_usuario` int(11) NOT NULL,
-  `id_tipo_usuario` int(11) NOT NULL,
-  `nombre` varchar(150) NOT NULL,
-  `usuario` varchar(150) NOT NULL,
-  `password` varchar(150) NOT NULL,
-  `email` varchar(150) NOT NULL
+  `id_usuario` int NOT NULL,
+  `id_tipo_usuario` int NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
+  `usuario` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
+  `password` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_spanish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 --
@@ -847,55 +872,55 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `cuentas`
 --
 ALTER TABLE `cuentas`
-  MODIFY `id_cuenta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_cuenta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `formas_pago`
 --
 ALTER TABLE `formas_pago`
-  MODIFY `id_forma_pago` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_forma_pago` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `grupos`
 --
 ALTER TABLE `grupos`
-  MODIFY `id_grupo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_grupo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`
 --
 ALTER TABLE `rubros`
-  MODIFY `id_rubro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id_rubro` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de la tabla `sub_rubros`
 --
 ALTER TABLE `sub_rubros`
-  MODIFY `id_sub_rubro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id_sub_rubro` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos`
 --
 ALTER TABLE `tipos`
-  MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_tipo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_usuario`
 --
 ALTER TABLE `tipos_usuario`
-  MODIFY `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_tipo_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Restricciones para tablas volcadas
@@ -930,4 +955,8 @@ ALTER TABLE `rubros`
 --
 ALTER TABLE `sub_rubros`
   ADD CONSTRAINT `id_rubos_sub_rubros_fk` FOREIGN KEY (`id_rubro`) REFERENCES `rubros` (`id_rubro`);
+COMMIT;
 
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -7,7 +7,6 @@ module.exports = async (request, response) => {
     // Asignar el valor de codigo_cuentas al objeto JSON recibido
     registro.codigo_cuenta = codigoCuentas;
 
-    console.log(registro);
     try {
         //let registroJson = JSON.stringify(registro);
 

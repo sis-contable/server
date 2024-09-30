@@ -27,7 +27,6 @@ module.exports.getLookForBookDiaryDate = async (request, response) => {
     const { desde } = request.params;
     const { hasta } = request.params;
 
-    console.log(LookForDate);
     try {
         conexion.query('CALL getLookForBookDiaryDate(?,?)', [desde,hasta], (error, result) => {
             

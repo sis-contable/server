@@ -4,6 +4,6 @@ const { getLookForBookDiaryWord , getLookForBookDiaryDate } = require('../../con
 
 const app = Router();
 app.get('/LookForBookDiaryWord/:word', getLookForBookDiaryWord);
-app.get('/LookForBookDiaryDate/:dede/:hasta', getLookForBookDiaryDate);
+app.get('/LookForBookDiaryDate/:desde/:hasta', getLookForBookDiaryDate);
 
 module.exports = app;

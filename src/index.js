@@ -32,6 +32,10 @@ app.use('/', allControllersBook.selectRegisterBookDiary);
 app.use('/', allControllersBook.deleteBookDiary);
 app.use('/', allControllersBook.LookForBookDiary);
 
+const allAccountsPlan = require('./routers/accountsPlanRouters/allAccountsPlanRouters');
+app.use('/', allAccountsPlan.getListAccountsPlan);
+app.use('/', allAccountsPlan.getListAccountsPlanByKeyword);
+
 app.listen(port, ()=>{
     console.log('El puerto que esta escuchando es:' + port);
 })
