@@ -36,6 +36,9 @@ const allAccountsPlan = require('./routers/accountsPlanRouters/allAccountsPlanRo
 app.use('/', allAccountsPlan.getListAccountsPlan);
 app.use('/', allAccountsPlan.getListAccountsPlanByKeyword);
 
+const allLedgerDiary = require('./routers/ledgerRouters/allLedgerRouter');
+app.use('/', allLedgerDiary.getLedger);
+
 app.listen(port, ()=>{
     console.log('El puerto que esta escuchando es:' + port);
 })
