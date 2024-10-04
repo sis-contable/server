@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-09-2024 a las 02:40:44
+-- Tiempo de generación: 04-10-2024 a las 06:02:45
 -- Versión del servidor: 8.0.32
 -- Versión de PHP: 8.2.4
 
@@ -235,6 +235,55 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getGroupDiary` ()   begin
 	SELECT * FROM `grupos` WHERE 1;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLedger` (IN `codigo_cuentas` VARCHAR(50))   BEGIN
+	DECLARE parte1 VARCHAR(10);
+    DECLARE parte2 VARCHAR(10);
+    DECLARE parte3 VARCHAR(10);
+    DECLARE parte4 VARCHAR(10);
+    DECLARE parte5 VARCHAR(10);
+    DECLARE pc_saldo_acumulado INT;
+
+    SET parte1 = SUBSTRING_INDEX(codigo_cuentas, '.', 1);
+    SET parte2 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 2), '.', -1);
+    SET parte3 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 3), '.', -1);
+    SET parte4 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 4), '.', -1);
+    SET parte5 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 5), '.', -1);
+    
+    SELECT plan_cuenta.saldo_acumulado
+    INTO pc_saldo_acumulado
+    FROM plan_cuenta
+    WHERE plan_cuenta.codigo_cuenta = codigo_cuentas
+    LIMIT 1;
+    
+	SELECT 
+        libro_diario.id_libro_diario, 
+        libro_diario.fecha_registro, 
+        cuentas.cuenta,
+        libro_diario.debe, 
+        libro_diario.haber,
+        CASE 
+            WHEN (parte1 = '1' OR parte1 = '5')  THEN 
+                SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) 
+            ELSE 
+                NULL
+        END AS saldo_deudor,
+        CASE 
+            WHEN (parte1 = '2' OR parte1 = '3' OR parte1 = '4') THEN 
+                SUM(libro_diario.haber - libro_diario.debe) OVER (ORDER BY libro_diario.id_libro_diario) 
+            ELSE 
+                NULL
+        END AS saldo_acreedor,
+		CASE 
+            WHEN ROW_NUMBER() OVER (ORDER BY libro_diario.id_libro_diario) = 1 THEN pc_saldo_acumulado 
+            ELSE NULL 
+        END AS saldo_acumulado
+    FROM libro_diario
+    JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+    WHERE libro_diario.id_sub_rubro = parte4
+    ORDER BY 
+        libro_diario.id_libro_diario;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListAccountsPlan` ()   BEGIN
 	select plan_cuenta.codigo_cuenta , sub_rubros.sub_rubro , cuentas.cuenta , 
 	plan_cuenta.saldo_inicial , plan_cuenta.saldo_actual , plan_cuenta.saldo_acumulado , 
@@ -259,8 +308,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 			formas_pago.forma_pago, cuentas.cuenta, libro_diario.fecha_registro, libro_diario.descripcion, libro_diario.debe, 
 			libro_diario.haber, libro_diario.gestion 
 			FROM `libro_diario`, `cuentas`, `formas_pago`, `grupos`, `rubros`,`sub_rubros`, `tipos` 
-			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro AND libro_diario.id_forma_pago = formas_pago.id_forma_pago AND libro_diario.id_cuenta = cuentas.id_cuenta) AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo);
-END$$
+			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro AND libro_diario.id_forma_pago = formas_pago.id_forma_pago AND libro_diario.id_cuenta = cuentas.id_cuenta) 
+			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo) ORDER by fecha_registro;
+end$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
@@ -545,8 +595,21 @@ CREATE TABLE `libro_diario` (
 --
 
 INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(14, 1, 8, 24, 3, 2, '2024-09-15', 'Inversion', 1500.00, 0.00, 1),
-(15, 1, 1, 1, 3, 1, '2024-09-22', 'Pago por deuda', 500.00, 0.00, 0);
+(17, 1, 1, 1, 1, 3, '2024-09-25', 'Pago en efectivo por caja en pesos', 2000.00, 0.00, 1),
+(18, 2, 1, 3, 3, 1, '2024-09-26', 'Depósito en Banco Galicia en pesos', 0.00, 2000.00, 1),
+(19, 1, 11, 29, 2, 2, '2024-09-27', 'Deuda comercial con cheque', 3000.00, 0.00, 0),
+(20, 2, 11, 30, 1, 3, '2024-09-27', 'Deuda diversa pagada en efectivo', 0.00, 3000.00, 1),
+(21, 1, 33, 59, 1, 3, '2024-09-28', 'Venta de productos en efectivo', 5000.00, 0.00, 1),
+(22, 2, 33, 60, 3, 1, '2024-09-29', 'Venta de servicios mediante transferencia', 0.00, 5000.00, 1),
+(24, 1, 39, 71, 1, 3, '2024-09-30', 'Gastos de oficina pagados en efectivo', 1000.00, 0.00, 1),
+(25, 2, 39, 72, 3, 1, '2024-09-30', 'Pago de sueldos administrativos mediante transferencia', 0.00, 1000.00, 1),
+(26, 1, 6, 19, 1, 3, '2024-09-30', 'Créditos diversos en efectivo', 2500.00, 0.00, 0),
+(27, 2, 12, 32, 1, 3, '2024-09-29', 'Préstamo personal pagado en efectivo', 0.00, 2500.00, 1),
+(28, 1, 5, 17, 1, 3, '2024-09-28', 'Anticipos a proveedores en efectivo', 1500.00, 0.00, 0),
+(29, 2, 5, 18, 1, 3, '2024-09-28', 'Anticipos a empleados en efectivo', 0.00, 1500.00, 1),
+(32, 1, 2, 3, 3, 3, '2024-09-29', 'Transferencia bancaria para pago de servicios', 5000.00, 0.00, 1),
+(33, 2, 2, 3, 3, 3, '2024-09-30', 'Egreso por transferencia bancaria para pago de servicios', 0.00, 5000.00, 1),
+(34, 1, 1, 1, 1, 3, '2024-09-25', 'Pago en efectivo', 1500.00, 0.00, 1);
 
 -- --------------------------------------------------------
 
@@ -570,8 +633,18 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
-('1.1.1.1.1', 1, 1, -500, -500, -500, '2024-09-22', 1),
-('1.2.8.24.2', 24, 2, -1500, -1500, -1500, '2024-09-18', 1);
+('1.1.1.1.3', 1, 3, -2000, -3500, -3500, '2024-09-30', 1),
+('1.1.1.3.1', 3, 1, 2000, 2000, 2000, '2024-09-30', 1),
+('1.1.1.3.3', 3, 3, -5000, 0, 0, '2024-09-30', 1),
+('1.1.5.17.3', 17, 3, -1500, -1500, -1500, '2024-09-30', 1),
+('1.1.5.18.3', 18, 3, 1500, 1500, 1500, '2024-09-30', 1),
+('1.1.6.19.3', 19, 3, -2500, -2500, -2500, '2024-09-30', 1),
+('2.1.11.29.2', 29, 2, -3000, -3000, -3000, '2024-09-30', 1),
+('2.1.11.30.3', 30, 3, 3000, 3000, 3000, '2024-09-30', 1),
+('2.1.12.32.3', 32, 3, 2500, 2500, 2500, '2024-09-30', 1),
+('4.3.33.59.3', 59, 3, -5000, -5000, -5000, '2024-09-30', 1),
+('4.3.33.60.1', 60, 1, 5000, 5000, 5000, '2024-09-30', 1),
+('5.3.39.72.1', 72, 1, 1000, 1000, 1000, '2024-09-30', 1);
 
 -- --------------------------------------------------------
 
@@ -890,7 +963,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`
