@@ -4,11 +4,11 @@ const { getGroup, getType, getRubro, getSubRubro, getAccounts, getPaymentMethods
 
 const app = Router();
 
-app.get('/getGroup', getGroup);
-app.get('/getType', getType);
-app.get('/getRubro/:idg/:idt', getRubro);  
-app.get('/getSubRubro/:id_rubro', getSubRubro);    
-app.get('/getAccounts', getAccounts);
-app.get('/getPaymentMethods', getPaymentMethods);
+app.get('/group', getGroup);
+app.get('/type', getType);
+app.get('/rubro/:idg/:idt', getRubro);  
+app.get('/subRubro/:id_rubro', getSubRubro);    
+app.get('/accounts', getAccounts);
+app.get('/paymentMethods', getPaymentMethods);
 
 module.exports = app;

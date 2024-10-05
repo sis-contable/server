@@ -1,8 +1,8 @@
 const { Router } = require('express');
 //Importamos los router que nos permiten enrutar nuestros ints.js
-const deleteUser = require('../controllers/deleteUserController.js');
+const editUser = require('../../controllers/userControllers/editUserController');
 
 const app = Router();
-app.delete('/deleteUser/:id', deleteUser);
+app.put('/editUser/:id', editUser);
 
 module.exports = app;

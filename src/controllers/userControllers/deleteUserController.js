@@ -1,4 +1,4 @@
-const conexion = require('../models/conexion');
+const conexion = require('../../models/conexion');
 
 module.exports = async (request, response) => {
     

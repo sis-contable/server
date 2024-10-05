@@ -3,6 +3,6 @@ const { Router } = require('express');
 const getLedger = require('../../controllers/ledgerControllers/ledgerController');
 
 const app = Router();
-app.get('/getLedger/:codigo_cuenta', getLedger);
+app.get('/listBookLedger/:codigo_cuenta', getLedger);
 
 module.exports = app;

@@ -1,11 +1,13 @@
 const conexion = require('../../models/conexion.js');
 
 module.exports = async (request, response) => {
-    const registro = request.body;
-    // Concatenar los valores de id_grupo, id_tipo, id_rubro, id_sub_rubro, id_cuenta
-    const codigoCuentas = `${registro.id_grupo}.${registro.id_tipo}.${registro.id_rubro}.${registro.id_sub_rubro}.${registro.id_cuenta}`;
-    // Asignar el valor de codigo_cuentas al objeto JSON recibido
-    registro.codigo_cuenta = codigoCuentas;
+    const registro = request.body; // Accede al arreglo de registros
+
+    // Iterar sobre cada registro y construir el codigo_cuenta
+    registro.forEach(registro => {
+        const codigoCuentas = `${registro.id_grupo}.${registro.id_tipo}.${registro.id_rubro}.${registro.id_sub_rubro}.${registro.id_cuenta}`;
+        registro.codigo_cuenta = codigoCuentas;
+    });
 
     try {
         //let registroJson = JSON.stringify(registro);

@@ -3,7 +3,7 @@ const { Router } = require('express');
 const { getLookForBookDiaryWord , getLookForBookDiaryDate } = require('../../controllers/bookDiaryControllers/getLookForBookDiaryController.js');
 
 const app = Router();
-app.get('/LookForBookDiaryWord/:word', getLookForBookDiaryWord);
-app.get('/LookForBookDiaryDate/:desde/:hasta', getLookForBookDiaryDate);
+app.get('/lookForBookDiaryWord/:word', getLookForBookDiaryWord);
+app.get('/lookForBookDiaryDate/:desde/:hasta', getLookForBookDiaryDate);
 
 module.exports = app;

@@ -1,18 +1,35 @@
 POST  http://localhost:3000/createRegisterBookDiary
 Content-Type: application/json
 
-{
-    "id_usuario": 1,
-    "id_grupo": 1,
-    "id_tipo": 2,
-    "id_rubro": 8,
-    "id_sub_rubro": 24,
-    "id_forma_pago": 3,
-    "id_cuenta": 2,
-    "fecha_registro": "2024-09-15",
-    "descripcion": "Inversion",
-    "debe": 1500,
-    "haber": 0,
-    "gestion": 1,
-    "codigo_cuenta": ""
-}
+[
+    {	
+        "id_usuario": 1,
+        "id_rubro": 1,
+        "id_grupo": 1,
+        "id_tipo": 1,
+        "id_sub_rubro": 1,
+        "id_forma_pago": 1,
+        "id_cuenta": 3,
+        "fecha_registro": "2024-10-05",
+        "descripcion" : "Dinero efectivo para caja" ,
+        "debe": 1000 ,
+        "haber": 0 ,
+        "gestion" : 1 ,
+        "codigo_cuenta" : ""
+    },
+    {
+        "id_usuario": 1,
+        "id_grupo": 2,
+        "id_tipo": 1,
+        "id_rubro": 11,
+        "id_sub_rubro": 29,
+        "id_forma_pago": 4,
+        "id_cuenta": 1,
+        "fecha_registro": "2024-10-05",
+        "descripcion" : "Prestamo tomado de Galicia" ,
+        "debe": 0,
+        "haber": 1000 ,
+        "gestion" : 0 ,
+        "codigo_cuenta" : ""
+    }
+]

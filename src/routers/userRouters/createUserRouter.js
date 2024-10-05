@@ -1,8 +1,8 @@
 const { Router } = require('express');
 //Importamos los router que nos permiten enrutar nuestros ints.js
-const editUser = require('../controllers/editUserController.js');
+const createUser = require('../../controllers/userControllers/createUserController');
 
 const app = Router();
-app.put('/editUser/:id', editUser);
+app.post('/createUser', createUser);
 
 module.exports = app;

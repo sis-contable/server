@@ -17,7 +17,7 @@ app.use(cors({
 }));
 
 //traemos el archivo donde se encuentran las rutas
-const allControllersUsers = require('./routers/allUsersRouters');
+const allControllersUsers = require('./routers/userRouters/allUsersRouters');
 app.use('/', allControllersUsers.login);
 app.use('/',allControllersUsers.listUsers);
 app.use('/',allControllersUsers.editUser);
