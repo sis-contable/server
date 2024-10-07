@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-10-2024 a las 06:02:45
+-- Tiempo de generación: 07-10-2024 a las 05:45:28
 -- Versión del servidor: 8.0.32
 -- Versión de PHP: 8.2.4
 
@@ -256,22 +256,27 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLedger` (IN `codigo_cuentas` VAR
     LIMIT 1;
     
 	SELECT 
-        libro_diario.id_libro_diario, 
+        libro_diario.asiento, 
         libro_diario.fecha_registro, 
         cuentas.cuenta,
         libro_diario.debe, 
         libro_diario.haber,
+        sub_rubros.sub_rubro,
+
+        -- Columna de saldo deudor, solo se muestra si el saldo acumulado es positivo
         CASE 
-            WHEN (parte1 = '1' OR parte1 = '5')  THEN 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) > 0 THEN 
                 SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) 
             ELSE 
-                NULL
+                0
         END AS saldo_deudor,
+
+        -- Columna de saldo acreedor, solo se muestra si el saldo acumulado es negativo
         CASE 
-            WHEN (parte1 = '2' OR parte1 = '3' OR parte1 = '4') THEN 
-                SUM(libro_diario.haber - libro_diario.debe) OVER (ORDER BY libro_diario.id_libro_diario) 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) < 0 THEN 
+                ABS(SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario)) 
             ELSE 
-                NULL
+                0
         END AS saldo_acreedor,
 		CASE 
             WHEN ROW_NUMBER() OVER (ORDER BY libro_diario.id_libro_diario) = 1 THEN pc_saldo_acumulado 
@@ -279,6 +284,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLedger` (IN `codigo_cuentas` VAR
         END AS saldo_acumulado
     FROM libro_diario
     JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+    join sub_rubros on libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
     WHERE libro_diario.id_sub_rubro = parte4
     ORDER BY 
         libro_diario.id_libro_diario;
@@ -308,8 +314,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 			formas_pago.forma_pago, cuentas.cuenta, libro_diario.fecha_registro, libro_diario.descripcion, libro_diario.debe, 
 			libro_diario.haber, libro_diario.gestion 
 			FROM `libro_diario`, `cuentas`, `formas_pago`, `grupos`, `rubros`,`sub_rubros`, `tipos` 
-			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro AND libro_diario.id_forma_pago = formas_pago.id_forma_pago AND libro_diario.id_cuenta = cuentas.id_cuenta) 
-			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo) ORDER by fecha_registro;
+			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+            AND libro_diario.id_forma_pago = formas_pago.id_forma_pago 
+            AND libro_diario.id_cuenta = cuentas.id_cuenta) 
+			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo)
+            ORDER by libro_diario.asiento;
 end$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
@@ -344,25 +353,26 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryWord` (IN `LookFor` VARCHAR(50))   BEGIN
 	SELECT libro_diario.id_libro_diario, libro_diario.fecha_registro, grupos.grupo, tipos.tipo, rubros.rubro, sub_rubros.sub_rubro, 
-		   formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
-		   libro_diario.haber, libro_diario.gestion 
-	FROM libro_diario
-	JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
-	JOIN formas_pago ON libro_diario.id_forma_pago = formas_pago.id_forma_pago
-	JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
-	JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
-	JOIN grupos ON rubros.id_grupo = grupos.id_grupo
-	JOIN tipos ON rubros.id_tipo = tipos.id_tipo
-	WHERE grupos.grupo LIKE CONCAT('%', LookFor, '%')
-	   OR tipos.tipo LIKE CONCAT('%', LookFor, '%')
-	   OR rubros.rubro LIKE CONCAT('%', LookFor, '%')
-	   OR sub_rubros.sub_rubro LIKE CONCAT('%', LookFor, '%')
-	   OR formas_pago.forma_pago LIKE CONCAT('%', LookFor, '%')
-	   OR cuentas.cuenta LIKE CONCAT('%', LookFor, '%')
-	   OR libro_diario.descripcion LIKE CONCAT('%', LookFor, '%')
-	   OR libro_diario.debe LIKE CONCAT('%', LookFor, '%')
-	   OR libro_diario.haber LIKE CONCAT('%', LookFor, '%')
-	   OR libro_diario.gestion LIKE CONCAT('%', LookFor, '%');
+       formas_pago.forma_pago, cuentas.cuenta, libro_diario.descripcion, libro_diario.debe, 
+       libro_diario.haber, libro_diario.gestion 
+FROM libro_diario
+LEFT JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+LEFT JOIN formas_pago ON libro_diario.id_forma_pago = formas_pago.id_forma_pago
+LEFT JOIN rubros ON libro_diario.id_rubro = rubros.id_rubro
+LEFT JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+LEFT JOIN grupos ON rubros.id_grupo = grupos.id_grupo
+LEFT JOIN tipos ON rubros.id_tipo = tipos.id_tipo
+WHERE grupos.grupo LIKE CONCAT('%', LookFor, '%')
+   OR tipos.tipo LIKE CONCAT('%', LookFor, '%')
+   OR rubros.rubro LIKE CONCAT('%', LookFor, '%')
+   OR sub_rubros.sub_rubro LIKE CONCAT('%', LookFor, '%')
+   OR formas_pago.forma_pago LIKE CONCAT('%', LookFor, '%')
+   OR cuentas.cuenta LIKE CONCAT('%', LookFor, '%')
+   OR libro_diario.descripcion LIKE CONCAT('%', LookFor, '%')
+   OR libro_diario.debe LIKE CONCAT('%', LookFor, '%')
+   OR libro_diario.haber LIKE CONCAT('%', LookFor, '%')
+   OR libro_diario.gestion LIKE CONCAT('%', LookFor, '%');
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaymentMethods` ()   begin
@@ -389,7 +399,11 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJson` JSON)   begin
 	DECLARE error_code INT DEFAULT 0;
     DECLARE cuenta_exist INT DEFAULT 0;
+    DECLARE idx INT DEFAULT 0;
+    DECLARE total INT;
+    
     -- Declarar variables para almacenar los valores extraídos del JSON
+    DECLARE v_asiento INT;
     DECLARE v_id_usuario INT;
     DECLARE v_id_rubro INT;
     DECLARE v_id_sub_rubro INT;
@@ -407,73 +421,98 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `insertRegisterBookDiary` (IN `dataJ
    -- Variables por si existe la cuenta
    DECLARE v_saldo_actual DOUBLE;
    DECLARE v_saldo_acumulado DOUBLE;
-
-
-    -- Extraer valores del JSON Libro diario
-    SET v_id_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_usuario'));
-    SET v_id_rubro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_rubro'));
-    SET v_id_sub_rubro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_sub_rubro'));
-    SET v_id_forma_pago  = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_forma_pago'));
-    SET v_id_cuenta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_cuenta'));
-    SET v_fecha_registro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.fecha_registro'));
-    SET v_descripcion = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.descripcion'));
-    SET v_debe = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.debe'));
-    SET v_haber = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.haber'));
-    SET v_gestion = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.gestion'));
-    -- Extraer valores del JSON Plan de Cuenta
-	SET v_codigo_cuenta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.codigo_cuenta'));
-    SET v_id_grupo = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_grupo'));
-    SET v_id_tipo = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_tipo'));
    
- -- Iniciar transacción
-    START TRANSACTION;
-
-    -- Realizar el insert
-        INSERT INTO `libro_diario`(`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) 
-        VALUES (null, v_id_usuario, v_id_rubro, v_id_sub_rubro, v_id_forma_pago, v_id_cuenta, v_fecha_registro, v_descripcion, v_debe, v_haber, v_gestion);
+   SELECT IFNULL(MAX(asiento), 0) + 1 INTO v_asiento FROM libro_diario;
     
-	-- Verificar si la cuenta ya existe
-	    SELECT COUNT(*) INTO cuenta_exist FROM plan_cuenta WHERE codigo_cuenta = v_codigo_cuenta;
-	    IF cuenta_exist != 0 then
+    -- Contar el número de registros (asientos) que contiene el JSON
+    SET total = JSON_LENGTH(dataJson);
 
-	        -- Si ya existe, obtener los valores actuales
-	        SELECT saldo_actual, saldo_acumulado INTO v_saldo_actual, v_saldo_acumulado
-	        FROM plan_cuenta
-	        WHERE codigo_cuenta = v_codigo_cuenta;
-	
-	        -- Actualizar los saldos según el debe y haber
-	        SET v_saldo_actual = v_saldo_actual - v_debe + v_haber;
-	        SET v_saldo_acumulado = v_saldo_acumulado - v_debe + v_haber;
-	
-	        -- Actualizar la cuenta en plan_cuenta
-	        UPDATE plan_cuenta
-	        SET saldo_actual = v_saldo_actual,
-	            saldo_acumulado = v_saldo_acumulado
-	        WHERE codigo_cuenta = v_codigo_cuenta;
-	
-	    ELSE
+	-- Iniciar la transacción
+    START TRANSACTION;
+    
+     -- Iterar sobre los registros (asientos) y hacer las inserciones
+    WHILE idx < total DO
+			-- Extraer cada registro del JSON
+            SET v_id_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_usuario')));
+            SET v_id_grupo = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_grupo')));
+			SET v_id_rubro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_rubro')));
+			SET v_id_sub_rubro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_sub_rubro')));
+			SET v_id_forma_pago = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_forma_pago')));
+			SET v_id_cuenta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].id_cuenta')));
+			SET v_fecha_registro = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].fecha_registro')));
+			SET v_descripcion = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].descripcion')));
+			SET v_debe = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].debe')));
+			SET v_haber = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].haber')));
+			SET v_gestion = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].gestion')));
 
-	       -- Actualizar los saldos según el debe y haber
-	    	IF v_debe != 0 then
-	        	SET v_saldo_actual = -v_debe;
-	        ELSE
-	        	SET v_saldo_actual = v_haber;
-	        END IF;
+		-- Realizar el insert
+			INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`,  `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) 
+			VALUES (null, v_asiento, v_id_usuario, v_id_rubro, v_id_sub_rubro, v_id_forma_pago, v_id_cuenta, v_fecha_registro, v_descripcion, v_debe, v_haber, v_gestion);
+		
+		-- Verificar si la cuenta ya existe
+		SET v_codigo_cuenta = JSON_UNQUOTE(JSON_EXTRACT(dataJson, CONCAT('$[', idx, '].codigo_cuenta')));
+		SELECT COUNT(*) INTO cuenta_exist FROM plan_cuenta WHERE codigo_cuenta = v_codigo_cuenta;
+		IF cuenta_exist != 0 then
+
+			-- Si ya existe, obtener los valores actuales
+			SELECT saldo_actual, saldo_acumulado INTO v_saldo_actual, v_saldo_acumulado
+			FROM plan_cuenta
+			WHERE codigo_cuenta = v_codigo_cuenta;
 	
-	        -- Realizar el insert
-	        INSERT INTO plan_cuenta (codigo_cuenta, id_sub_rubro, id_cuenta, saldo_inicial, saldo_actual, saldo_acumulado, fecha_creacion, estado)
-	        VALUES (v_codigo_cuenta, v_id_sub_rubro, v_id_cuenta,  v_saldo_actual, v_saldo_actual, v_saldo_actual, CURDATE(), 1);
+			-- Actualizar los saldos según el debe y haber
+            IF v_id_grupo = 1 OR v_id_grupo = 5 THEN 
+			SET v_saldo_actual = v_saldo_actual + (v_debe - v_haber); 
+            SET v_saldo_acumulado = v_saldo_acumulado + (v_debe - v_haber);
+			END IF;
+			
+            IF v_id_grupo = 2 OR v_id_grupo = 3 OR v_id_grupo = 4 THEN 
+			SET v_saldo_actual = v_saldo_actual + (v_haber - v_debe); 
+            SET v_saldo_acumulado = v_saldo_acumulado + (v_haber - v_debe);
+			END IF;
 	
-	        -- Verificar si hubo un error
-	        GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO;
-	        IF error_code != 0 THEN
-	            ROLLBACK;
-	            SELECT 'Ha ocurrido un error durante la operación' AS MESSAGE;
-	        ELSE
-	            COMMIT;
-	            SELECT 'Operación completada exitosamente' AS MESSAGE;
-	        END IF;
-    	END IF;
+			-- Actualizar la cuenta en plan_cuenta
+			UPDATE plan_cuenta
+			SET saldo_actual = v_saldo_actual,
+				saldo_acumulado = v_saldo_acumulado
+			WHERE codigo_cuenta = v_codigo_cuenta;
+		
+		ELSE
+			
+            -- Inicializa el saldo si no existe la cuenta
+			SET v_saldo_actual = 0;
+			SET v_saldo_acumulado = 0;
+        
+			-- Actualizar los saldos según el debe y haber
+			IF v_id_grupo = 1 OR v_id_grupo = 5 THEN 
+			SET v_saldo_actual = v_saldo_actual + (v_debe - v_haber); 
+			SET v_saldo_acumulado = v_saldo_acumulado + (v_debe - v_haber);
+            
+			END IF;
+			
+			IF v_id_grupo = 2 OR v_id_grupo = 3 OR v_id_grupo = 4 THEN 
+			SET v_saldo_actual = v_saldo_actual + (v_haber - v_debe); 
+			SET v_saldo_acumulado = v_saldo_acumulado + (v_haber - v_debe);
+			END IF;
+			
+			-- Realizar el insert
+			INSERT INTO plan_cuenta (codigo_cuenta, id_sub_rubro, id_cuenta, saldo_inicial, saldo_actual, saldo_acumulado, fecha_creacion, estado)
+			VALUES (v_codigo_cuenta, v_id_sub_rubro, v_id_cuenta,  v_saldo_actual, v_saldo_actual, v_saldo_actual, CURDATE(), 1);
+			
+		END IF;
+        
+		SET idx = idx + 1;
+        
+	END WHILE;
+    
+	-- Verificar si hubo un error
+	GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO;
+	IF error_code != 0 THEN
+		ROLLBACK;
+		SELECT 'Ha ocurrido un error durante la operación' AS MESSAGE;
+	ELSE
+		COMMIT;
+		SELECT 'Operación completada exitosamente' AS MESSAGE;
+	END IF;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `login` (IN `dataJson` JSON)   BEGIN
@@ -578,6 +617,7 @@ INSERT INTO `grupos` (`id_grupo`, `grupo`) VALUES
 
 CREATE TABLE `libro_diario` (
   `id_libro_diario` int NOT NULL,
+  `asiento` int NOT NULL,
   `id_usuario` int NOT NULL,
   `id_rubro` int NOT NULL,
   `id_sub_rubro` int NOT NULL,
@@ -594,22 +634,33 @@ CREATE TABLE `libro_diario` (
 -- Volcado de datos para la tabla `libro_diario`
 --
 
-INSERT INTO `libro_diario` (`id_libro_diario`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(17, 1, 1, 1, 1, 3, '2024-09-25', 'Pago en efectivo por caja en pesos', 2000.00, 0.00, 1),
-(18, 2, 1, 3, 3, 1, '2024-09-26', 'Depósito en Banco Galicia en pesos', 0.00, 2000.00, 1),
-(19, 1, 11, 29, 2, 2, '2024-09-27', 'Deuda comercial con cheque', 3000.00, 0.00, 0),
-(20, 2, 11, 30, 1, 3, '2024-09-27', 'Deuda diversa pagada en efectivo', 0.00, 3000.00, 1),
-(21, 1, 33, 59, 1, 3, '2024-09-28', 'Venta de productos en efectivo', 5000.00, 0.00, 1),
-(22, 2, 33, 60, 3, 1, '2024-09-29', 'Venta de servicios mediante transferencia', 0.00, 5000.00, 1),
-(24, 1, 39, 71, 1, 3, '2024-09-30', 'Gastos de oficina pagados en efectivo', 1000.00, 0.00, 1),
-(25, 2, 39, 72, 3, 1, '2024-09-30', 'Pago de sueldos administrativos mediante transferencia', 0.00, 1000.00, 1),
-(26, 1, 6, 19, 1, 3, '2024-09-30', 'Créditos diversos en efectivo', 2500.00, 0.00, 0),
-(27, 2, 12, 32, 1, 3, '2024-09-29', 'Préstamo personal pagado en efectivo', 0.00, 2500.00, 1),
-(28, 1, 5, 17, 1, 3, '2024-09-28', 'Anticipos a proveedores en efectivo', 1500.00, 0.00, 0),
-(29, 2, 5, 18, 1, 3, '2024-09-28', 'Anticipos a empleados en efectivo', 0.00, 1500.00, 1),
-(32, 1, 2, 3, 3, 3, '2024-09-29', 'Transferencia bancaria para pago de servicios', 5000.00, 0.00, 1),
-(33, 2, 2, 3, 3, 3, '2024-09-30', 'Egreso por transferencia bancaria para pago de servicios', 0.00, 5000.00, 1),
-(34, 1, 1, 1, 1, 3, '2024-09-25', 'Pago en efectivo', 1500.00, 0.00, 1);
+INSERT INTO `libro_diario` (`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
+(70, 1, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(71, 1, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(72, 2, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(73, 2, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(74, 3, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(75, 3, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(76, 4, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(77, 4, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(78, 5, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(79, 5, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(80, 6, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
+(81, 6, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
+(82, 7, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(83, 7, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(84, 8, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(85, 8, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(86, 9, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(87, 9, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(88, 10, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(89, 10, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(90, 11, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(91, 11, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(92, 12, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(93, 12, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
+(94, 13, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
+(95, 13, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0);
 
 -- --------------------------------------------------------
 
@@ -633,18 +684,8 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
-('1.1.1.1.3', 1, 3, -2000, -3500, -3500, '2024-09-30', 1),
-('1.1.1.3.1', 3, 1, 2000, 2000, 2000, '2024-09-30', 1),
-('1.1.1.3.3', 3, 3, -5000, 0, 0, '2024-09-30', 1),
-('1.1.5.17.3', 17, 3, -1500, -1500, -1500, '2024-09-30', 1),
-('1.1.5.18.3', 18, 3, 1500, 1500, 1500, '2024-09-30', 1),
-('1.1.6.19.3', 19, 3, -2500, -2500, -2500, '2024-09-30', 1),
-('2.1.11.29.2', 29, 2, -3000, -3000, -3000, '2024-09-30', 1),
-('2.1.11.30.3', 30, 3, 3000, 3000, 3000, '2024-09-30', 1),
-('2.1.12.32.3', 32, 3, 2500, 2500, 2500, '2024-09-30', 1),
-('4.3.33.59.3', 59, 3, -5000, -5000, -5000, '2024-09-30', 1),
-('4.3.33.60.1', 60, 1, 5000, 5000, 5000, '2024-09-30', 1),
-('5.3.39.72.1', 72, 1, 1000, 1000, 1000, '2024-09-30', 1);
+('1.1.1.1.3', 1, 3, 1000, -1000, -1000, '2024-10-06', 1),
+('2.1.11.29.1', 29, 1, 1000, -1000, -1000, '2024-10-06', 1);
 
 -- --------------------------------------------------------
 
@@ -963,7 +1004,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`

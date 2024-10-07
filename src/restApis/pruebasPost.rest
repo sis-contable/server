@@ -11,9 +11,9 @@ Content-Type: application/json
         "id_forma_pago": 1,
         "id_cuenta": 3,
         "fecha_registro": "2024-10-05",
-        "descripcion" : "Dinero efectivo para caja" ,
-        "debe": 1000 ,
-        "haber": 0 ,
+        "descripcion" : "pago a cobrador galicia" ,
+        "debe": 0 ,
+        "haber": 1000 ,
         "gestion" : 1 ,
         "codigo_cuenta" : ""
     },
@@ -26,9 +26,9 @@ Content-Type: application/json
         "id_forma_pago": 4,
         "id_cuenta": 1,
         "fecha_registro": "2024-10-05",
-        "descripcion" : "Prestamo tomado de Galicia" ,
-        "debe": 0,
-        "haber": 1000 ,
+        "descripcion" : "cobro por tranferencia" ,
+        "debe": 1000,
+        "haber": 0 ,
         "gestion" : 0 ,
         "codigo_cuenta" : ""
     }
