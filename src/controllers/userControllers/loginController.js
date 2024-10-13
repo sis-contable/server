@@ -20,7 +20,6 @@ module.exports = async (request, response) => {
                     expiresIn: '30m'  // Tiempo en el que expira
                 });
                 const idUser = result[0][0].id_usuario;  // Acceder a la primera fila del resultado
-                console.log(result);
                 response.send({
                     token: token,
                     id_usuario: idUser

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-10-2024 a las 05:45:28
+-- Tiempo de generación: 13-10-2024 a las 03:15:42
 -- Versión del servidor: 8.0.32
 -- Versión de PHP: 8.2.4
 
@@ -284,8 +284,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLedger` (IN `codigo_cuentas` VAR
         END AS saldo_acumulado
     FROM libro_diario
     JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
-    join sub_rubros on libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+    JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
     WHERE libro_diario.id_sub_rubro = parte4
+    AND libro_diario.id_cuenta = parte5
     ORDER BY 
         libro_diario.id_libro_diario;
 END$$
@@ -635,32 +636,38 @@ CREATE TABLE `libro_diario` (
 --
 
 INSERT INTO `libro_diario` (`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`) VALUES
-(70, 1, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(71, 1, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(72, 2, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(73, 2, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(74, 3, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(75, 3, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(76, 4, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(77, 4, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(78, 5, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(79, 5, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(80, 6, 1, 1, 1, 1, 3, '2024-10-05', 'Dinero efectivo para caja', 1000.00, 0.00, 1),
-(81, 6, 1, 11, 29, 4, 1, '2024-10-05', 'Prestamo tomado de Galicia', 0.00, 1000.00, 0),
-(82, 7, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(83, 7, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(84, 8, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(85, 8, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(86, 9, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(87, 9, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(88, 10, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(89, 10, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(90, 11, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(91, 11, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(92, 12, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(93, 12, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0),
-(94, 13, 1, 1, 1, 1, 3, '2024-10-05', 'pago a cobrador galicia', 0.00, 1000.00, 1),
-(95, 13, 1, 11, 29, 4, 1, '2024-10-05', 'cobro por tranferencia', 1000.00, 0.00, 0);
+(1, 1, 1, 1, 1, 1, 3, '2024-10-01', 'Venta a crédito, factura 12345', 1962.00, 0.00, 0),
+(2, 1, 1, 3, 9, 1, 3, '2024-10-01', 'Cobro de factura 12345 en efectivo', 0.00, 1962.00, 0),
+(3, 2, 1, 1, 1, 1, 3, '2024-10-02', 'Venta a crédito, factura 12346', 5440.00, 0.00, 0),
+(4, 2, 1, 3, 9, 1, 3, '2024-10-02', 'Cobro de factura 12346 en efectivo', 0.00, 5440.00, 0),
+(5, 3, 1, 1, 1, 1, 3, '2024-10-03', 'Venta a crédito, factura 12347', 25000.00, 0.00, 0),
+(6, 3, 1, 3, 9, 3, 1, '2024-10-03', 'Cobro de factura 12347 con tranferencia', 0.00, 25000.00, 0),
+(7, 4, 1, 1, 1, 1, 3, '2024-10-04', 'Venta a crédito, factura 12348', 18000.00, 0.00, 0),
+(8, 4, 1, 3, 9, 1, 3, '2024-10-04', 'Cobro de factura 12348 en efectivo', 0.00, 18000.00, 0),
+(9, 5, 2, 3, 9, 3, 2, '2024-10-10', 'pago de cliente', 727.00, 0.00, 0),
+(10, 5, 2, 3, 12, 3, 1, '2024-10-10', 'pago de cliente', 0.00, 727.00, 0),
+(11, 6, 2, 3, 9, 3, 2, '2024-10-10', 'cobro a cliente', 1998.00, 0.00, 0),
+(12, 6, 2, 3, 12, 3, 2, '2024-10-10', 'pago de cliente', 0.00, 1998.00, 0),
+(13, 7, 2, 3, 12, 3, 2, '2024-10-10', 'cobro a cliente', 4200.00, 0.00, 0),
+(14, 7, 2, 3, 9, 3, 2, '2024-10-10', 'pago de cliente', 0.00, 4200.00, 0),
+(15, 8, 2, 1, 1, 1, 3, '2024-10-10', 'cobro en efectivo', 116.00, 0.00, 0),
+(16, 8, 2, 3, 12, 1, 3, '2024-10-10', 'pago en efectivo', 0.00, 116.00, 0),
+(17, 9, 2, 1, 1, 1, 3, '2024-10-10', 'cobro en efectivo', 208.00, 0.00, 0),
+(18, 9, 2, 3, 12, 1, 3, '2024-10-10', 'pago en efectivo', 0.00, 208.00, 0),
+(19, 10, 2, 12, 31, 3, 1, '2024-10-10', 'prestamo galicia', 0.00, 500000.00, 0),
+(20, 10, 2, 1, 3, 3, 1, '2024-10-10', 'prestamo galicia', 500000.00, 0.00, 0),
+(21, 11, 2, 12, 31, 3, 1, '2024-10-10', 'prestamo galicia', 0.00, 500000.00, 0),
+(22, 11, 2, 1, 3, 3, 1, '2024-10-10', 'prestamo galicia', 500000.00, 0.00, 0),
+(23, 12, 2, 27, 47, 3, 2, '2024-10-10', 'capital social', 0.00, 1500000.00, 0),
+(24, 12, 2, 26, 45, 1, 3, '2024-10-10', 'aportes', 1500000.00, 0.00, 0),
+(25, 13, 2, 12, 31, 1, 2, '2024-10-11', 'prestamo tomado santander', 0.00, 1500000.00, 1),
+(26, 13, 2, 1, 3, 1, 2, '2024-10-11', 'prestamo tomado santarder', 1500000.00, 0.00, 1),
+(27, 14, 2, 27, 48, 3, 1, '2024-10-11', 'capital social pagado', 0.00, 2500000.00, 0),
+(28, 14, 2, 26, 46, 3, 1, '2024-10-11', 'aporte por transferencia', 2500000.00, 0.00, 0),
+(29, 15, 2, 11, 30, 1, 3, '2024-10-11', 'pago de servicios', 0.00, 120000.00, 1),
+(30, 15, 2, 11, 30, 1, 3, '2024-10-11', 'servicios', 120000.00, 0.00, 1),
+(31, 16, 2, 1, 1, 1, 3, '2024-10-12', 'cobro a cliente', 1500.00, 0.00, 1),
+(32, 16, 2, 3, 9, 1, 3, '2024-10-12', 'pago de cliente', 0.00, 1500.00, 1);
 
 -- --------------------------------------------------------
 
@@ -684,8 +691,22 @@ CREATE TABLE `plan_cuenta` (
 --
 
 INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
-('1.1.1.1.3', 1, 3, 1000, -1000, -1000, '2024-10-06', 1),
-('2.1.11.29.1', 29, 1, 1000, -1000, -1000, '2024-10-06', 1);
+('1.1.1.1.3', 1, 3, 1962, 52226, 52226, '2024-10-08', 1),
+('1.1.1.3.1', 3, 1, 500000, 1000000, 1000000, '2024-10-10', 1),
+('1.1.1.3.2', 3, 2, 1500000, 1500000, 1500000, '2024-10-11', 1),
+('1.1.3.12.1', 12, 1, -727, -727, -727, '2024-10-10', 1),
+('1.1.3.12.2', 12, 2, -1998, 2202, 2202, '2024-10-10', 1),
+('1.1.3.12.3', 12, 3, -116, -324, -324, '2024-10-10', 1),
+('1.1.3.9.1', 9, 1, -25000, -25000, -25000, '2024-10-08', 1),
+('1.1.3.9.2', 9, 2, 727, -1475, -1475, '2024-10-10', 1),
+('1.1.3.9.3', 9, 3, -1962, -26902, -26902, '2024-10-08', 1),
+('2.1.11.30.3', 30, 3, 120000, 0, 0, '2024-10-11', 1),
+('2.1.12.31.1', 31, 1, 500000, 1000000, 1000000, '2024-10-10', 1),
+('2.1.12.31.2', 31, 2, 1500000, 1500000, 1500000, '2024-10-11', 1),
+('3.3.26.45.3', 45, 3, -1500000, -1500000, -1500000, '2024-10-10', 1),
+('3.3.26.46.1', 46, 1, -2500000, -2500000, -2500000, '2024-10-11', 1),
+('3.3.27.47.2', 47, 2, 1500000, 1500000, 1500000, '2024-10-10', 1),
+('3.3.27.48.1', 48, 1, 2500000, 2500000, 2500000, '2024-10-11', 1);
 
 -- --------------------------------------------------------
 
@@ -1004,7 +1025,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `id_libro_diario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`

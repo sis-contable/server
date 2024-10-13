@@ -26,7 +26,7 @@ app.use('/',allControllersUsers.createUser);
 
 //traemos el archivo donde se encuentran las rutas del registro
 const allControllersBook = require('./routers/bookDiaryRouters/allbookDiaryRouters');
-app.use('/', allControllersBook.creatRegisterBook);
+app.use('/', allControllersBook.createRegisterBook);
 app.use('/', allControllersBook.listBookDiary);
 app.use('/', allControllersBook.selectRegisterBookDiary);
 app.use('/', allControllersBook.deleteBookDiary);
