@@ -1,38 +1,53 @@
 const conexion = require('../../models/conexion');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { SECRET_JWT_KEY } = require('../../models/config');
 
 module.exports = async (request, response) => {
-    const { usuario , clave } = request.body;
-    //Hacemos la consulta a la base de datos
-    //const consult = 'SELECT * FROM usuarios WHERE usuario = ? and password = ?';
+    const { usuario, clave } = request.body;
 
-    try{
-        let userJson = JSON.stringify({ usuario, clave });
-        conexion.query('CALL login(?)', [userJson], (error, result)=>{
-            if(error){
-                //Si hay un error envianoslo
-                response.send(error);
+    try {
+        conexion.query('CALL getLoginNew(?)', [usuario], async (error, result) => {
+            if (error) {
+                // Si hay un error en la consulta, envía la respuesta y termina la función
+                return response.status(500).send(error);
             }
 
             // Verificar que result esté definido y que tenga resultados
             if (result && result.length > 0 && result[0].length > 0) {
-                const token = jwt.sign({ usuario }, "Stack", {
-                    expiresIn: '30m'  // Tiempo en el que expira
-                });
-                const idUser = result[0][0].id_usuario;  // Acceder a la primera fila del resultado
-                response.send({
-                    token: token,
-                    id_usuario: idUser
-                });
+                const hash1 = result[0][0].password;
+                const valid = await bcrypt.compareSync(clave, hash1);
+                const idUser = result[0][0].id_usuario; // Acceder a la primera fila del resultado
+                if (valid) {
+                    // Generar el token JWT
+                    const token = jwt.sign(
+                        { user: usuario, id_usuario: idUser },
+                        SECRET_JWT_KEY, 
+                        { expiresIn: '1h' } // Tiempo en el que expira 
+                    );
+                        
+                    return response
+                        .cookie('access_token', token, {
+                            httpOnly: false,
+                            secure: process.env.NODE_ENV === 'production',
+                            sameSite: 'lax',
+                            maxAge: 1000 * 60 * 60, // 1 hora
+                        })
+                        .json({ message: 'Inicio de sesión exitoso', success: true });
+                    
+                } else {
+                    // Clave incorrecta
+                    console.log('clave incorrecta');
+                    return response.status(401).send({ message: 'Clave incorrecta' });
+                }
             } else {
-                // Si no hay resultados o el usuario no existe
+                // Usuario incorrecto
                 console.log('Wrong user');
-                response.status(401).send({ message: 'Usuario o contraseña incorrectos' });
+                return response.status(401).send({ message: 'Usuario incorrecto' });
             }
         });
     } catch (err) {
         console.error('Error en el servidor:', err);
-        response.status(500).send({ error: 'Error en el servidor' });
+        return response.status(500).send({ error: 'Error en el servidor' });
     }
-  
 };

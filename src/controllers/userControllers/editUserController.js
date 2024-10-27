@@ -1,4 +1,6 @@
 const conexion = require('../../models/conexion');
+const { SALT_ROUNDS } = require('../../models/config');
+const bcrypt = require('bcrypt');
 
 module.exports = async (request, response) => {
     
@@ -6,6 +8,10 @@ module.exports = async (request, response) => {
     const userId = request.params.id;
     // Obtener los datos actualizados del usuario del cuerpo de la solicitud
     const updatedUser = request.body;
+
+    const hashPass = bcrypt.hashSync(updatedUser.password, SALT_ROUNDS);
+    // Reemplazar la clave original con la clave hasheada
+    updatedUser.password = hashPass;
     
     try{    
         // Si el ID de usuario no está en los datos actualizados, asignar el ID de los parámetros

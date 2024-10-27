@@ -330,6 +330,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginNew` (IN `usu` VARCHAR(150))   begin
+	SELECT * FROM `usuarios` WHERE usuario = usu;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForBookDiaryDate` (IN `desde` VARCHAR(10), IN `hasta` VARCHAR(10))   begin
 
 	declare fecha_desde date;
@@ -920,7 +924,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`, `id_tipo_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
-(1, 1, 'Lucia Bellome', 'Luci', '1234', 'luci@gmail.com'),
+(1, 1, 'Luci Bellome', 'Lucifer', '$2b$10$WLdf9s55HoJ1alE8E9UmqupXPq0hJprw15ZNT5huOGPTWk6Z2mi1i', 'luci@hotmail.com');
 (2, 1, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
 (20, 2, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
 
