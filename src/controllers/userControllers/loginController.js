@@ -28,7 +28,7 @@ module.exports = async (request, response) => {
                         
                     return response
                         .cookie('access_token', token, {
-                            httpOnly: false,
+                            httpOnly: false, //Nos permita ingresar a la cookie desde frontend
                             secure: process.env.NODE_ENV === 'production',
                             sameSite: 'lax',
                             maxAge: 1000 * 60 * 60, // 1 hora
@@ -37,12 +37,10 @@ module.exports = async (request, response) => {
                     
                 } else {
                     // Clave incorrecta
-                    console.log('clave incorrecta');
                     return response.status(401).send({ message: 'Clave incorrecta' });
                 }
             } else {
                 // Usuario incorrecto
-                console.log('Wrong user');
                 return response.status(401).send({ message: 'Usuario incorrecto' });
             }
         });
