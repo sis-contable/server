@@ -1,8 +1,12 @@
 const conexion = require('../../models/conexion');
+const { SALT_ROUNDS } = require('../../models/config');
+const bcrypt = require('bcrypt');
 
 module.exports = async (request, response) => {
     const newUser = request.body;
-
+    const hashPass = bcrypt.hashSync(newUser.password, SALT_ROUNDS);
+    // Reemplazar la clave original con la clave hasheada
+    newUser.password = hashPass;
     try {
         let userJson = JSON.stringify(newUser);
         conexion.query('CALL createUser(?)', [userJson], (error, result) => {
