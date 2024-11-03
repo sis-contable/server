@@ -1,3 +1,4 @@
+
 DELIMITER $$
 --
 -- Procedimientos
@@ -411,7 +412,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DAT
         LEFT JOIN 
             grupos ON rubros.id_grupo = grupos.id_grupo
         WHERE 
-            grupos.id_grupo IN (4, 5) AND libro_diario.fecha_registro BETWEEN desde AND hasta
+            grupos.id_grupo IN (4, 5) AND libro_diario.fecha_registro BETWEEN desde AND hasta AND libro_diario.descripcion = 'Asiento de Cierre'
         GROUP BY 
             rubros.rubro;
 
@@ -619,7 +620,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
 			WHERE (libro_diario.id_rubro = rubros.id_rubro AND libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
             AND libro_diario.id_forma_pago = formas_pago.id_forma_pago 
             AND libro_diario.id_cuenta = cuentas.id_cuenta) 
-			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo)
+			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo) AND libro_diario.activo = 1
             ORDER by libro_diario.asiento;
 end$$
 
@@ -823,7 +824,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
 
        -- Verifica que los valores de total sean mayores a cero antes de agregarlos al JSON
        -- Ya que si total_positivo es m
-        IF grupo = 'Activo' THEN
+        IF grupo = 'Activos' THEN
 		    IF tipo = 'Corriente' THEN
 		        SET situacion_patrimonial = JSON_ARRAY_APPEND(
 		            situacion_patrimonial,
@@ -843,7 +844,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
 		            )
 		        );
 		    END IF;
-		ELSEIF grupo = 'Pasivo' THEN
+		ELSEIF grupo = 'Pasivos' THEN
 		    IF tipo = 'Corriente' THEN
 		        SET situacion_patrimonial = JSON_ARRAY_APPEND(
 		            situacion_patrimonial,
