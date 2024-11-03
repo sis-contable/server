@@ -205,18 +205,6 @@ ALTER TABLE `sub_rubros`
 ALTER TABLE `tipos`
   ADD PRIMARY KEY (`id_tipo`);
 
---
--- Indices de la tabla `tipos_usuario`
---
-ALTER TABLE `tipos_usuario`
-  ADD PRIMARY KEY (`id_tipo_usuario`);
-
---
--- Indices de la tabla `usuarios`
---
-ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id_usuario`),
-  ADD KEY `fk_usuario_tipos_idx` (`id_tipo_usuario`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -263,12 +251,6 @@ ALTER TABLE `sub_rubros`
 --
 ALTER TABLE `tipos`
   MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `tipos_usuario`
---
-ALTER TABLE `tipos_usuario`
-  MODIFY `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
