@@ -1,3 +1,4 @@
+
 DELIMITER $$
 --
 -- Procedimientos
@@ -823,7 +824,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
 
        -- Verifica que los valores de total sean mayores a cero antes de agregarlos al JSON
        -- Ya que si total_positivo es m
-        IF grupo = 'Activo' THEN
+        IF grupo = 'Activos' THEN
 		    IF tipo = 'Corriente' THEN
 		        SET situacion_patrimonial = JSON_ARRAY_APPEND(
 		            situacion_patrimonial,
@@ -843,7 +844,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
 		            )
 		        );
 		    END IF;
-		ELSEIF grupo = 'Pasivo' THEN
+		ELSEIF grupo = 'Pasivos' THEN
 		    IF tipo = 'Corriente' THEN
 		        SET situacion_patrimonial = JSON_ARRAY_APPEND(
 		            situacion_patrimonial,
