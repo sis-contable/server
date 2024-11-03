@@ -132,23 +132,11 @@ CREATE TABLE `tipos` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `tipos_usuario`
---
-
-CREATE TABLE `tipos_usuario` (
-  `id_tipo_usuario` int(11) NOT NULL,
-  `tipo_usuario` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
   `id_usuario` int(11) NOT NULL,
-  `id_tipo_usuario` int(11) NOT NULL,
   `nombre` varchar(150) NOT NULL,
   `usuario` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
