@@ -93,6 +93,10 @@ app.use('/', allAccountsPlan.getListAccountsPlanByKeyword);
 const allLedgerDiary = require('./routers/ledgerRouters/allLedgerRouter');
 app.use('/', allLedgerDiary.getLedger);
 
+//Trmoes las rutas paara el balance
+const allBalanceRouters = require('./routers/balanceRouters/allRoutersBalance.js');
+app.use('/', allBalanceRouters.getBalanceGeneral);
+
 app.listen(PORT, ()=>{
     console.log('El puerto que esta escuchando es:' + PORT);
 })

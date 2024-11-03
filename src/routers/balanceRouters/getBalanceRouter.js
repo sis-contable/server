@@ -3,6 +3,6 @@ const { Router } = require('express');
 const getBalance = require('../../controllers/balanceControllers/balanceController');
 
 const app = Router();
-app.get('/listBlance/:desde/:hasta', getBalance);
+app.post('/creatBalance/:desde/:hasta', getBalance);
 
 module.exports = app;

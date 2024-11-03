@@ -208,7 +208,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAllUser` ()   begin
 	select * from usuarios; 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getAsientoCierre` (IN `desde` DATE, IN `hasta` DATE)   begin
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAsientoCierre` (IN `desde` DATE, IN `hasta` DATE, OUT `resultado` JSON)   begin
 	-- Declaramos las variables para el asiento de cierre
 	DECLARE done_cierre INT DEFAULT FALSE;
 	DECLARE rubro_cierre VARCHAR(100);
@@ -319,7 +319,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAsientoCierre` (IN `desde` DATE,
     END IF;
 
     -- Devolver el JSON
-    SELECT asiento_cierre AS json_resultado;
+    set resultado = asiento_cierre;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getBalanceGeneral` (IN `desde` DATE, IN `hasta` DATE)   BEGIN
@@ -332,40 +332,37 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getBalanceGeneral` (IN `desde` DATE
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;  -- Revertir la transacción en caso de error
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en el procedimiento, se ha realizado un ROLLBACK';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en el procedimiento de getBalanceGeneral, se ha realizado un ROLLBACK';
     END;
 
     -- Iniciar la transacción
     START TRANSACTION;
 
-    -- Llamar al procedimiento getEstadoResultado y capturar el resultado
-    CALL sis_contable.getEstadoResultado(desde, hasta);
-    SET json_estado_resultado = (SELECT json_resultado FROM sis_contable.getEstadoResultado);
-
-    -- Verificar si el resultado es válido antes de continuar
-    IF json_estado_resultado IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getEstadoResultado: Resultado vacío o nulo';
-    END IF;
-
-    -- Llamar al procedimiento getAsientoCierre y capturar el resultado
-    CALL sis_contable.getAsientoCierre(desde, hasta);
-    SET json_asiento_cierre = (SELECT json_resultado FROM sis_contable.getAsientoCierre);
-
-    -- Verificar si el resultado es válido antes de continuar
-    IF json_asiento_cierre IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getAsientoCierre: Resultado vacío o nulo';
-    END IF;
-
-    -- Llamar al procedimiento getBalanceGeneral y capturar el resultado
-    CALL sis_contable.getBalanceGeneral(desde, hasta);
-    SET json_situacion_patrimonial = (SELECT json_resultado FROM sis_contable.getBalanceGeneral);
-
-    -- Verificar si el resultado es válido antes de finalizar
-    IF json_situacion_patrimonial IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getBalanceGeneral: Resultado vacío o nulo';
-    END IF;
-
-    -- Confirmar la transacción si todo ha salido bien
+	    -- Llamar a getEstadoResultado y capturar el resultado JSON en json_estado_resultado
+	    CALL sis_contable.getEstadoResultado(desde, hasta, @json_estado_resultado);
+	    SELECT @json_estado_resultado INTO json_estado_resultado;
+	
+	    IF json_estado_resultado IS NULL THEN
+	        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getEstadoResultado: Resultado vacío o nulo';
+	    END IF;
+	
+	    -- Llamar a getAsientoCierre y capturar el resultado JSON en json_asiento_cierre
+	    CALL sis_contable.getAsientoCierre(desde, hasta, @json_asiento_cierre);
+	    SELECT @json_asiento_cierre INTO json_asiento_cierre;
+	
+	    IF json_asiento_cierre IS NULL THEN
+	        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getAsientoCierre: Resultado vacío o nulo';
+	    END IF;
+	
+	    -- Llamar a getSituacionPatrimonial y capturar el resultado JSON en json_situacion_patrimonial
+	    CALL sis_contable.getSituacionPatrimonial(desde, hasta, @json_situacion_patrimonial);
+	    SELECT @json_situacion_patrimonial INTO json_situacion_patrimonial;
+	
+	    IF json_situacion_patrimonial IS NULL THEN
+	        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en getSituacionPatrimonial: Resultado vacío o nulo';
+	    END IF;
+	   
+    -- Confirmar la transacción
     COMMIT;
 
     -- Devolver los JSON
@@ -374,7 +371,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getBalanceGeneral` (IN `desde` DATE
            json_situacion_patrimonial AS json_situacion_patrimonial;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DATE, IN `hasta` DATE)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DATE, IN `hasta` DATE, OUT `resultado` JSON)   BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE total_positivo DOUBLE DEFAULT 0;
     DECLARE total_negativo DOUBLE DEFAULT 0;
@@ -531,8 +528,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DAT
         SET estado_resultado = JSON_OBJECT('Error', 'estado_resultado no contiene datos');
     END IF;
 
-    -- Devolver el JSON
-    SELECT estado_resultado AS json_resultado;
+   -- Devolver el JSON
+	set resultado = estado_resultado;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getGroupDiary` ()   begin
@@ -695,7 +692,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getRubro` (IN `id_g` INT, IN `id_t`
 	AND id_tipo = id_t;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde` DATE, IN `hasta` DATE)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde` DATE, IN `hasta` DATE, OUT `resultado` JSON)   BEGIN
     DECLARE done INT DEFAULT FALSE;
     -- Totales para impctar al final de la situacion paatrimonial
     declare total_activos DOUBLE DEFAULT 0;
@@ -895,7 +892,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
     END IF;
 
     -- Devolver el JSON
-    SELECT situacion_patrimonial AS json_resultado;
+    set resultado = situacion_patrimonial;
 
 END$$
 
