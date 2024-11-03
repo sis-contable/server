@@ -23,7 +23,7 @@ module.exports = async (request, response) => {
                     const token = jwt.sign(
                         { user: usuario, id_usuario: idUser },
                         SECRET_JWT_KEY, 
-                        { expiresIn: '1h' } // Tiempo en el que expira 
+                        { expiresIn: '3m' } // Tiempo en el que expira 
                     );
                         
                     return response
@@ -31,7 +31,7 @@ module.exports = async (request, response) => {
                             httpOnly: false, //Nos permita ingresar a la cookie desde frontend
                             secure: process.env.NODE_ENV === 'production',
                             sameSite: 'lax',
-                            maxAge: 1000 * 60 * 60, // 1 hora
+                            maxAge: 1000 * 60 * 3, // Tiempo en el que expira
                         })
                         .json({ message: 'Inicio de sesión exitoso', success: true });
                     
