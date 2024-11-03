@@ -9,14 +9,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
 	DECLARE total_users INT DEFAULT 0;
     
     -- Declarar variables para almacenar los valores extraídos del JSON
-    DECLARE v_id_tipo_usuario INT;
     DECLARE v_nombre VARCHAR(255);
     DECLARE v_usuario VARCHAR(255);
     DECLARE v_password VARCHAR(255);
     DECLARE v_email VARCHAR(255);
 
     -- Extraer valores del JSON
-    SET v_id_tipo_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_tipo_usuario'));
     SET v_nombre = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.nombre'));
     SET v_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.usuario'));
     SET v_password = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.password'));
@@ -44,8 +42,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
 			START TRANSACTION;
 			
 			-- Intentar insertar el usuario
-			INSERT INTO usuarios(id_usuario , id_tipo_usuario , nombre , usuario , password , email)
-			VALUES(null , v_id_tipo_usuario , v_nombre , v_usuario , v_password , v_email);
+			INSERT INTO usuarios(id_usuario , nombre , usuario , password , email)
+			VALUES(null , v_nombre , v_usuario , v_password , v_email);
 			
 			-- Verificar si hubo un error
 			GET DIAGNOSTICS CONDITION 1 error_code = MYSQL_ERRNO;
@@ -165,7 +163,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `editUser` (IN `dataJson` JSON)   BE
     
     -- Declarar variables para almacenar los valores extraídos del JSON
     DECLARE v_id_usuario INT;
-    DECLARE v_id_tipo_usuario INT;
     DECLARE v_nombre VARCHAR(255);
     DECLARE v_usuario VARCHAR(255);
     DECLARE v_password VARCHAR(255);
@@ -173,7 +170,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `editUser` (IN `dataJson` JSON)   BE
 
     -- Extraer valores del JSON
     SET v_id_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_usuario'));
-    SET v_id_tipo_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.id_tipo_usuario'));
     SET v_nombre = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.nombre'));
     SET v_usuario = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.usuario'));
     SET v_password = JSON_UNQUOTE(JSON_EXTRACT(dataJson, '$.password'));
@@ -184,7 +180,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `editUser` (IN `dataJson` JSON)   BE
 
     -- Intentar insertar o actualizar el usuario
 	UPDATE usuarios 
-    SET id_tipo_usuario = v_id_tipo_usuario,
+    SET 
         nombre = v_nombre,
         usuario = v_usuario,
         password = v_password,
@@ -626,9 +622,7 @@ end$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
 
-	select usuarios.id_usuario , usuarios.id_tipo_usuario, usuarios.nombre , usuarios.usuario ,
-	tipos_usuario.tipo_usuario , usuarios.password , usuarios.email  from usuarios , tipos_usuario
-	where usuarios.id_tipo_usuario = tipos_usuario.id_tipo_usuario;
+	select usuarios.id_usuario , usuarios.nombre , usuarios.usuario, usuarios.password , usuarios.email  from usuarios ;
 
 END$$
 

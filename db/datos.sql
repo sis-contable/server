@@ -178,21 +178,13 @@ INSERT INTO `sub_rubros` (`id_sub_rubro`, `id_rubro`, `sub_rubro`) VALUES
 (81, 1, 'Banco Cta Corriente');
 
 --
--- Volcado de datos para la tabla `tipos_usuario`
---
-
-INSERT INTO `tipos_usuario` (`id_tipo_usuario`, `tipo_usuario`) VALUES
-(1, 'Administrador'),
-(2, 'Espectador');
-
---
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `id_tipo_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
-(1, 1, 'Luci Bellome', 'Lucifer', '$2b$10$WLdf9s55HoJ1alE8E9UmqupXPq0hJprw15ZNT5huOGPTWk6Z2mi1i', 'luci@hotmail.com'),
-(2, 1, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
-(20, 2, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
+(1, 'Luci Bellome', 'Lucifer', '$2b$10$WLdf9s55HoJ1alE8E9UmqupXPq0hJprw15ZNT5huOGPTWk6Z2mi1i', 'luci@hotmail.com'),
+(2, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
+(20, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
 COMMIT;
 
 
