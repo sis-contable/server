@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2024 a las 04:14:15
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Tiempo de generación: 04-11-2024 a las 06:00:53
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -471,14 +471,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DAT
     	
         -- Obtener el último asiento y calcular la ganancia del ejercicio
         SELECT COALESCE(MAX(asiento), 0) + 1, MAX(fecha_registro) INTO ultimo_asiento, fecha_registro_er FROM libro_diario;
-        IF ganancia_del_ejercicio < 0 then
+        IF ganancia_del_ejercicio >= 0 then
 	        -- Insertar Resultado del ejercicio si es un numero negativo va en el debe
 	        INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) 
-	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', ABS(ganancia_del_ejercicio), 0, 0, 0);
+	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', 0, ABS(ganancia_del_ejercicio), 0, 0);
     	ELSE
     		 -- Insertar Resultado del ejercicio si es numero positivo va en el haber
 	        INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) 
-	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', 0, ABS(ganancia_del_ejercicio), 0, 0);
+	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio',  ABS(ganancia_del_ejercicio), 0, 0, 0);
 	    END IF;
     END IF;
 
@@ -1095,7 +1095,13 @@ CREATE TABLE `cuentas` (
 INSERT INTO `cuentas` (`id_cuenta`, `cuenta`) VALUES
 (1, 'Banco Galicia'),
 (2, 'Banco Santander'),
-(3, 'Caja');
+(3, 'Caja'),
+(4, 'Activo Fijo'),
+(5, 'Aportes de los Propietarios'),
+(6, 'Clientes'),
+(7, 'Obligación Bancaria'),
+(8, 'Ingresos Operacionales'),
+(9, 'Gasto Administrativo');
 
 -- --------------------------------------------------------
 
@@ -1158,8 +1164,8 @@ CREATE TABLE `libro_diario` (
   `descripcion` varchar(300) NOT NULL,
   `debe` decimal(10,2) DEFAULT NULL,
   `haber` decimal(10,2) DEFAULT NULL,
-  `gestion` int(11) NOT NULL,
-  `activo` int(11) NOT NULL DEFAULT 1 COMMENT '1 - Activo / 0 - Desactivado'
+  `gestion` int(11) NOT NULL DEFAULT 0 COMMENT '0 - No es gestion/ 1 - Si es gestion',
+  `activo` int(11) NOT NULL DEFAULT 1 COMMENT '0 - Inactivo / 1 - Activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
 -- --------------------------------------------------------
@@ -1179,7 +1185,6 @@ CREATE TABLE `plan_cuenta` (
   `estado` int(11) NOT NULL COMMENT '0 - Desactivado / 1 - Activado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
--- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `rubros`
@@ -1356,31 +1361,11 @@ INSERT INTO `tipos` (`id_tipo`, `tipo`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `tipos_usuario`
---
-
-CREATE TABLE `tipos_usuario` (
-  `id_tipo_usuario` int(11) NOT NULL,
-  `tipo_usuario` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
-
---
--- Volcado de datos para la tabla `tipos_usuario`
---
-
-INSERT INTO `tipos_usuario` (`id_tipo_usuario`, `tipo_usuario`) VALUES
-(1, 'Administrador'),
-(2, 'Espectador');
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
   `id_usuario` int(11) NOT NULL,
-  `id_tipo_usuario` int(11) NOT NULL,
   `nombre` varchar(150) NOT NULL,
   `usuario` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
@@ -1391,10 +1376,10 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `id_tipo_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
-(1, 1, 'Luci Bellome', 'Lucifer', '$2b$10$WLdf9s55HoJ1alE8E9UmqupXPq0hJprw15ZNT5huOGPTWk6Z2mi1i', 'luci@hotmail.com'),
-(2, 1, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
-(20, 2, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `usuario`, `password`, `email`) VALUES
+(1, 'Luci Bellome', 'Lucifer', '$2b$10$WLdf9s55HoJ1alE8E9UmqupXPq0hJprw15ZNT5huOGPTWk6Z2mi1i', 'luci@hotmail.com'),
+(2, 'Osvaldo Plaza', 'ova', '1234', 'osvaldo@gmail.com'),
+(20, 'Esteban Lores', 'Esteban', 'es123', 'esteban@gmail.com');
 
 --
 -- Índices para tablas volcadas
@@ -1459,17 +1444,10 @@ ALTER TABLE `tipos`
   ADD PRIMARY KEY (`id_tipo`);
 
 --
--- Indices de la tabla `tipos_usuario`
---
-ALTER TABLE `tipos_usuario`
-  ADD PRIMARY KEY (`id_tipo_usuario`);
-
---
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id_usuario`),
-  ADD KEY `fk_usuario_tipos_idx` (`id_tipo_usuario`);
+  ADD PRIMARY KEY (`id_usuario`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1479,7 +1457,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `cuentas`
 --
 ALTER TABLE `cuentas`
-  MODIFY `id_cuenta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_cuenta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `formas_pago`
@@ -1497,7 +1475,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`
@@ -1518,16 +1496,10 @@ ALTER TABLE `tipos`
   MODIFY `id_tipo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `tipos_usuario`
---
-ALTER TABLE `tipos_usuario`
-  MODIFY `id_tipo_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Restricciones para tablas volcadas
