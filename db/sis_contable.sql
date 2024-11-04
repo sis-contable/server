@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2024 a las 03:42:39
+-- Tiempo de generación: 04-11-2024 a las 04:14:15
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -471,9 +471,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getEstadoResultado` (IN `desde` DAT
     	
         -- Obtener el último asiento y calcular la ganancia del ejercicio
         SELECT COALESCE(MAX(asiento), 0) + 1, MAX(fecha_registro) INTO ultimo_asiento, fecha_registro_er FROM libro_diario;
-        -- Insertar asiento de cierre
-        INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) 
-        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', ABS(ganancia_del_ejercicio), 0, 0, 0);
+        IF ganancia_del_ejercicio < 0 then
+	        -- Insertar Resultado del ejercicio si es un numero negativo va en el debe
+	        INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) 
+	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', ABS(ganancia_del_ejercicio), 0, 0, 0);
+    	ELSE
+    		 -- Insertar Resultado del ejercicio si es numero positivo va en el haber
+	        INSERT INTO `libro_diario`(`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) 
+	        VALUES (NULL, ultimo_asiento, 1, 32, 57, 1, 3, fecha_registro_er, 'Resultado del ejercicio', 0, ABS(ganancia_del_ejercicio), 0, 0);
+	    END IF;
     END IF;
 
     -- Actualizar el JSON con la ganancia del ejercicio
@@ -789,7 +795,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSituacionPatrimonial` (IN `desde
     -- Actualizar el JSON con el total de activos
     SET situacion_patrimonial = JSON_SET(situacion_patrimonial, '$.Situacion_patrimonial.total_activos', total_activos);
     
-   -- Calcular el total de los activos teniendo en cuenta que:
+   
     -- Aumento del Pasivo  → Se registra en el haber.
     -- Disminución del Pasivo → Se registra en el debe.
     SELECT 
