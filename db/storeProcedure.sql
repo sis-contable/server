@@ -1,4 +1,3 @@
-
 DELIMITER $$
 --
 -- Procedimientos
