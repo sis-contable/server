@@ -89,6 +89,7 @@ app.use('/', allControllersBook.LookForBookDiary);
 const allAccountsPlan = require('./routers/accountsPlanRouters/allAccountsPlanRouters');
 app.use('/', allAccountsPlan.getListAccountsPlan);
 app.use('/', allAccountsPlan.getListAccountsPlanByKeyword);
+app.use('/', allAccountsPlan.deletAccount);
 
 const allLedgerDiary = require('./routers/ledgerRouters/allLedgerRouter');
 app.use('/', allLedgerDiary.getLedger);

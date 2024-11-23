@@ -79,6 +79,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `createUser` (IN `dataJson` JSON)   
     END IF;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deletAccount` (IN `cuenta` VARCHAR(50))   BEGIN
+    DECLARE mensaje VARCHAR(255);
+
+    IF EXISTS (SELECT 1 FROM plan_cuenta WHERE codigo_cuenta = cuenta AND saldo_actual = 0) THEN
+        DELETE FROM plan_cuenta WHERE codigo_cuenta = cuenta;
+        SET mensaje = 'Cuenta eliminada correctamente';
+    ELSE
+        SET mensaje = 'El saldo de la cuenta debe estar en 0 para poder eliminarla';
+    END IF;
+
+    SELECT mensaje AS mensaje_exito;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBookDiary` (IN `v_id_libro_diario` INT)   begin
 	
 	DECLARE error_code INT DEFAULT 0;
