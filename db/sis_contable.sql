@@ -712,6 +712,130 @@ WHERE grupos.grupo LIKE CONCAT('%', LookFor, '%')
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForLedgerDate` (IN `desde` VARCHAR(10), IN `hasta` VARCHAR(10), IN `codigo_cuentas` VARCHAR(50))   BEGIN
+	DECLARE parte1 VARCHAR(10);
+    DECLARE parte2 VARCHAR(10);
+    DECLARE parte3 VARCHAR(10);
+    DECLARE parte4 VARCHAR(10);
+    DECLARE parte5 VARCHAR(10);
+    DECLARE pc_saldo_acumulado INT;
+    DECLARE fecha_desde DATE;
+    DECLARE fecha_hasta DATE; 
+    
+    SET fecha_desde = STR_TO_DATE(desde, '%Y-%m-%d');
+    SET fecha_hasta = STR_TO_DATE(hasta, '%Y-%m-%d');
+
+    SET parte1 = SUBSTRING_INDEX(codigo_cuentas, '.', 1);
+    SET parte2 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 2), '.', -1);
+    SET parte3 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 3), '.', -1);
+    SET parte4 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 4), '.', -1);
+    SET parte5 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 5), '.', -1);
+    
+    SELECT plan_cuenta.saldo_acumulado
+    INTO pc_saldo_acumulado
+    FROM plan_cuenta
+    WHERE plan_cuenta.codigo_cuenta = codigo_cuentas
+    LIMIT 1;
+    
+	SELECT 
+        libro_diario.asiento, 
+        libro_diario.fecha_registro, 
+        cuentas.cuenta,
+        libro_diario.debe, 
+        libro_diario.haber,
+        sub_rubros.sub_rubro,
+
+        -- Columna de saldo deudor, solo se muestra si el saldo acumulado es positivo
+        CASE 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) > 0 THEN 
+                SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) 
+            ELSE 
+                0
+        END AS saldo_deudor,
+
+        -- Columna de saldo acreedor, solo se muestra si el saldo acumulado es negativo
+        CASE 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) < 0 THEN 
+                ABS(SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario)) 
+            ELSE 
+                0
+        END AS saldo_acreedor,
+		CASE 
+            WHEN ROW_NUMBER() OVER (ORDER BY libro_diario.id_libro_diario) = 1 THEN pc_saldo_acumulado 
+            ELSE NULL 
+        END AS saldo_acumulado
+    FROM libro_diario
+    JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+    JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+    WHERE libro_diario.id_sub_rubro = parte4
+    AND libro_diario.id_cuenta = parte5
+    AND libro_diario.fecha_registro BETWEEN fecha_desde AND fecha_hasta
+    ORDER BY 
+        libro_diario.id_libro_diario;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLookForLedgerWord` (IN `LookFor` VARCHAR(50), IN `codigo_cuentas` VARCHAR(50))   BEGIN
+	DECLARE parte1 VARCHAR(10);
+    DECLARE parte2 VARCHAR(10);
+    DECLARE parte3 VARCHAR(10);
+    DECLARE parte4 VARCHAR(10);
+    DECLARE parte5 VARCHAR(10);
+    DECLARE pc_saldo_acumulado INT;
+
+    SET parte1 = SUBSTRING_INDEX(codigo_cuentas, '.', 1);
+    SET parte2 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 2), '.', -1);
+    SET parte3 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 3), '.', -1);
+    SET parte4 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 4), '.', -1);
+    SET parte5 = SUBSTRING_INDEX(SUBSTRING_INDEX(codigo_cuentas, '.', 5), '.', -1);
+    
+    SELECT plan_cuenta.saldo_acumulado
+    INTO pc_saldo_acumulado
+    FROM plan_cuenta
+    WHERE plan_cuenta.codigo_cuenta = codigo_cuentas
+    LIMIT 1;
+    
+	SELECT 
+        libro_diario.asiento, 
+        libro_diario.fecha_registro, 
+        cuentas.cuenta,
+        libro_diario.debe, 
+        libro_diario.haber,
+        sub_rubros.sub_rubro,
+
+        -- Columna de saldo deudor, solo se muestra si el saldo acumulado es positivo
+        CASE 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) > 0 THEN 
+                SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) 
+            ELSE 
+                0
+        END AS saldo_deudor,
+
+        -- Columna de saldo acreedor, solo se muestra si el saldo acumulado es negativo
+        CASE 
+            WHEN SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario) < 0 THEN 
+                ABS(SUM(libro_diario.debe - libro_diario.haber) OVER (ORDER BY libro_diario.id_libro_diario)) 
+            ELSE 
+                0
+        END AS saldo_acreedor,
+		CASE 
+            WHEN ROW_NUMBER() OVER (ORDER BY libro_diario.id_libro_diario) = 1 THEN pc_saldo_acumulado 
+            ELSE NULL 
+        END AS saldo_acumulado
+    FROM libro_diario
+    JOIN cuentas ON libro_diario.id_cuenta = cuentas.id_cuenta
+    JOIN sub_rubros ON libro_diario.id_sub_rubro = sub_rubros.id_sub_rubro
+    WHERE libro_diario.id_sub_rubro = parte4
+    AND libro_diario.id_cuenta = parte5
+    AND (libro_diario.asiento LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.fecha_registro LIKE CONCAT('%', LookFor, '%')
+	   OR cuentas.cuenta LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.debe LIKE CONCAT('%', LookFor, '%')
+	   OR libro_diario.haber LIKE CONCAT('%', LookFor, '%')
+	   OR sub_rubros.sub_rubro LIKE CONCAT('%', LookFor, '%'))
+    ORDER BY 
+        libro_diario.id_libro_diario;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaymentMethods` ()   begin
 	SELECT * FROM `formas_pago`;
 END$$

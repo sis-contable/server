@@ -1,7 +1,9 @@
 const getLedger = require('./getLedgerRouter');
+const getLookForLedger = require('./getLookForLedgerRouter');
 
 const allLedgerRouters = {
-    getLedger
+    getLedger,
+    getLookForLedger
 }
 
 module.exports = allLedgerRouters;

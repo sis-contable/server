@@ -93,6 +93,7 @@ app.use('/', allAccountsPlan.deletAccount);
 
 const allLedgerDiary = require('./routers/ledgerRouters/allLedgerRouter');
 app.use('/', allLedgerDiary.getLedger);
+app.use('/', allLedgerDiary.getLookForLedger);
 
 //Trmoes las rutas paara el balance
 const allBalanceRouters = require('./routers/balanceRouters/allRoutersBalance.js');
