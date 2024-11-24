@@ -38,7 +38,7 @@ app.use((req, res, next) => {
   });
 
   //Nos falta agregar para guardar la session 
-app.get('/', (request, response) => {
+app.get('/api', (request, response) => {
   const { user } = request.session;
   response.json({
     success: true,
@@ -46,7 +46,7 @@ app.get('/', (request, response) => {
   })
 });
 
-app.get('/protected', (request, response) => {
+app.get('/api/protected', (request, response) => {
     const token = request.cookies.access_token;
     if (!token) {
       return response.status(403).send('Acceso no autorizado');
@@ -68,36 +68,36 @@ app.get('/protected', (request, response) => {
 
 //traemos el archivo donde se encuentran las rutas Usuario y logeo
 const allControllersUsers = require('./routers/userRouters/allUsersRouters');
-app.use('/',allControllersUsers.listUsers);
-app.use('/',allControllersUsers.editUser);
-app.use('/',allControllersUsers.deleteUser);
-app.use('/',allControllersUsers.createUser);
-app.use('/', allControllersUsers.login);
-app.post('/logout', (request, response) => {
+app.use('/api',allControllersUsers.listUsers);
+app.use('/api',allControllersUsers.editUser);
+app.use('/api',allControllersUsers.deleteUser);
+app.use('/api',allControllersUsers.createUser);
+app.use('/api', allControllersUsers.login);
+app.post('/api/logout', (request, response) => {
   response.clearCookie('access_token');
   response.status(200).json({ message: 'Logout successful' }); // Enviar respuesta exitosa
 });
 
 //traemos el archivo donde se encuentran las rutas del registro
 const allControllersBook = require('./routers/bookDiaryRouters/allbookDiaryRouters');
-app.use('/', allControllersBook.createRegisterBook);
-app.use('/', allControllersBook.listBookDiary);
-app.use('/', allControllersBook.selectRegisterBookDiary);
-app.use('/', allControllersBook.deleteBookDiary);
-app.use('/', allControllersBook.LookForBookDiary);
+app.use('/api', allControllersBook.createRegisterBook);
+app.use('/api', allControllersBook.listBookDiary);
+app.use('/api', allControllersBook.selectRegisterBookDiary);
+app.use('/api', allControllersBook.deleteBookDiary);
+app.use('/api', allControllersBook.LookForBookDiary);
 
 const allAccountsPlan = require('./routers/accountsPlanRouters/allAccountsPlanRouters');
-app.use('/', allAccountsPlan.getListAccountsPlan);
-app.use('/', allAccountsPlan.getListAccountsPlanByKeyword);
-app.use('/', allAccountsPlan.deletAccount);
+app.use('/api', allAccountsPlan.getListAccountsPlan);
+app.use('/api', allAccountsPlan.getListAccountsPlanByKeyword);
+app.use('/api', allAccountsPlan.deletAccount);
 
 const allLedgerDiary = require('./routers/ledgerRouters/allLedgerRouter');
-app.use('/', allLedgerDiary.getLedger);
-app.use('/', allLedgerDiary.getLookForLedger);
+app.use('/api', allLedgerDiary.getLedger);
+app.use('/api', allLedgerDiary.getLookForLedger);
 
 //Trmoes las rutas paara el balance
 const allBalanceRouters = require('./routers/balanceRouters/allRoutersBalance.js');
-app.use('/', allBalanceRouters.getBalanceGeneral);
+app.use('/api', allBalanceRouters.getBalanceGeneral);
 
 app.listen(PORT, ()=>{
     console.log('El puerto que esta escuchando es:' + PORT);
