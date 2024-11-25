@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-11-2024 a las 06:00:53
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.0.28
+-- Tiempo de generación: 25-11-2024 a las 04:21:34
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -653,7 +653,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getListBookDiary` ()   begin
             AND libro_diario.id_forma_pago = formas_pago.id_forma_pago 
             AND libro_diario.id_cuenta = cuentas.id_cuenta) 
 			AND (rubros.id_grupo = grupos.id_grupo AND rubros.id_tipo = tipos.id_tipo) AND libro_diario.activo = 1
-            ORDER by libro_diario.asiento;
+            ORDER by libro_diario.id_libro_diario;
 end$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getListUsers` ()   begin
@@ -1305,6 +1305,36 @@ CREATE TABLE `libro_diario` (
   `activo` int(11) NOT NULL DEFAULT 1 COMMENT '0 - Inactivo / 1 - Activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `libro_diario`
+--
+
+INSERT INTO `libro_diario` (`id_libro_diario`, `asiento`, `id_usuario`, `id_rubro`, `id_sub_rubro`, `id_forma_pago`, `id_cuenta`, `fecha_registro`, `descripcion`, `debe`, `haber`, `gestion`, `activo`) VALUES
+(63, 1, 1, 1, 1, 3, 1, '2024-01-01', 'aporte de socios', 500000.00, 0.00, 0, 0),
+(64, 1, 1, 27, 48, 3, 1, '2024-01-01', 'aporte de socios', 0.00, 500000.00, 0, 0),
+(65, 2, 1, 1, 81, 3, 1, '2024-01-15', 'movimiento 1', 300000.00, 0.00, 0, 0),
+(66, 2, 1, 12, 31, 3, 1, '2024-01-15', 'movimiento 1', 0.00, 300000.00, 0, 0),
+(67, 3, 1, 7, 21, 2, 1, '2024-01-20', 'muebles', 40000.00, 0.00, 0, 0),
+(68, 3, 1, 1, 1, 3, 1, '2024-01-20', 'mueble', 0.00, 15000.00, 0, 0),
+(69, 3, 1, 11, 30, 2, 1, '2024-01-20', 'mueble', 0.00, 25000.00, 0, 0),
+(70, 4, 1, 1, 3, 2, 1, '2024-01-28', 'venta 1', 100000.00, 0.00, 0, 0),
+(71, 4, 1, 36, 65, 3, 1, '2024-01-28', 'Venta 1', 0.00, 100000.00, 1, 0),
+(72, 5, 1, 40, 73, 3, 1, '2024-01-28', 'Pago publicidad', 10000.00, 0.00, 1, 0),
+(73, 5, 1, 39, 71, 3, 1, '2024-01-28', 'Pago honorarios', 13000.00, 0.00, 1, 0),
+(74, 5, 1, 11, 30, 4, 1, '2024-01-28', 'acreedores varios', 0.00, 23000.00, 0, 0),
+(76, 6, 1, 1, 1, 3, 1, '2024-01-31', 'venta 2', 70000.00, 0.00, 0, 0),
+(77, 6, 1, 33, 59, 3, 1, '2024-01-31', 'venta 2 - producto 23', 0.00, 70000.00, 1, 0),
+(78, 7, 1, 4, 13, 3, 1, '2024-01-31', 'compra', 30000.00, 0.00, 0, 0),
+(79, 7, 1, 11, 29, 3, 1, '2024-01-31', 'compra', 0.00, 30000.00, 0, 0),
+(80, 8, 1, 39, 72, 3, 1, '2024-01-31', 'sueldo y jornda', 10000.00, 0.00, 1, 0),
+(81, 8, 1, 13, 33, 3, 1, '2024-01-31', 'Sueldo', 0.00, 10000.00, 0, 0),
+(82, 9, 1, 12, 31, 3, 1, '2024-02-11', 'acredores', 26000.00, 0.00, 0, 0),
+(83, 9, 1, 13, 34, 3, 1, '2024-02-11', 'honorarios a pagar', 8000.00, 0.00, 0, 0),
+(84, 9, 1, 1, 3, 1, 1, '2024-02-11', 'banco', 0.00, 34000.00, 0, 0),
+(85, 10, 1, 11, 30, 3, 1, '2024-03-25', 'deuda 2', 40000.00, 0.00, 0, 0),
+(86, 10, 1, 11, 29, 3, 1, '2024-03-25', 'deuda 2', 25000.00, 0.00, 0, 0),
+(87, 10, 1, 1, 3, 3, 1, '2024-03-25', 'banco', 0.00, 65000.00, 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -1322,6 +1352,29 @@ CREATE TABLE `plan_cuenta` (
   `estado` int(11) NOT NULL COMMENT '0 - Desactivado / 1 - Activado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `plan_cuenta`
+--
+
+INSERT INTO `plan_cuenta` (`codigo_cuenta`, `id_sub_rubro`, `id_cuenta`, `saldo_inicial`, `saldo_actual`, `saldo_acumulado`, `fecha_creacion`, `estado`) VALUES
+('1.1.1.1.1', 1, 1, 500000, 555000, 555000, '2024-11-24', 1),
+('1.1.1.3.1', 3, 1, 100000, 1000, 1000, '2024-11-24', 1),
+('1.1.1.81.1', 81, 1, 300000, 300000, 300000, '2024-11-24', 1),
+('1.1.4.13.1', 13, 1, 30000, 30000, 30000, '2024-11-24', 1),
+('1.2.7.21.1', 21, 1, 40000, 40000, 40000, '2024-11-24', 1),
+('2.1.11.29.1', 29, 1, 30000, 5000, 5000, '2024-11-24', 1),
+('2.1.11.30.1', 30, 1, 25000, 8000, 8000, '2024-11-24', 1),
+('2.1.12.31.1', 31, 1, 300000, 274000, 274000, '2024-11-24', 1),
+('2.1.13.33.1', 33, 1, 10000, 10000, 10000, '2024-11-24', 1),
+('2.1.13.34.1', 34, 1, -8000, -8000, -8000, '2024-11-24', 1),
+('3.3.27.48.1', 48, 1, 500000, 500000, 500000, '2024-11-24', 1),
+('4.3.33.59.1', 59, 1, 70000, 70000, 70000, '2024-11-24', 1),
+('4.3.36.65.1', 65, 1, 20000, 20000, 20000, '2024-11-24', 1),
+('5.3.39.71.1', 71, 1, 13000, 13000, 13000, '2024-11-24', 1),
+('5.3.39.72.1', 72, 1, 10000, 10000, 10000, '2024-11-24', 1),
+('5.3.40.73.1', 73, 1, 10000, 10000, 10000, '2024-11-24', 1);
+
+-- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `rubros`
@@ -1612,7 +1665,7 @@ ALTER TABLE `grupos`
 -- AUTO_INCREMENT de la tabla `libro_diario`
 --
 ALTER TABLE `libro_diario`
-  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id_libro_diario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT de la tabla `rubros`
